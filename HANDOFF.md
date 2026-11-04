@@ -4,18 +4,18 @@ Give a fresh session this file and the code, and it can continue without anythin
 
 ## 1. Current status
 
-- **Step we're in:** 3 of 7, the design is agreed and its PR is waiting to be merged.
-- **On main:** this file, a README title and `.gitignore`.
-- **Working branch:** `design`, for this step's notes and decisions.
-- **Open PR:** `design`, waiting for the owner to merge it.
-- **Next:** after that merge, `project-setup` starts from an up-to-date main.
+- **Step we're in:** 4 of 7, building. `project-setup` is the first of four branches.
+- **On main:** this file, a README title, `.gitignore` and the design.
+- **Working branch:** `project-setup`.
+- **Open PR:** [#2](https://github.com/ankathakanksha21/SmartiEnvironmental/pull/2), `project-setup`, waiting for the owner to merge it.
+- **Next:** after that merge, `customers` starts from an up-to-date main.
 - **Deadline:** finish today, 4 November 2026.
 
 ### Plan
 
 - [x] 1. Understand the brief and ask the open questions
 - [x] 2. Agree this file's outline and make the first commit
-- [ ] 3. Compare stacks and agree the design (agreed, PR waiting to be merged)
+- [x] 3. Compare stacks and agree the design
 - [ ] 4. Build features, one branch and PR at a time: `project-setup`, `customers`, `staff`, `jobs`
 - [ ] 5. Test everything and run the demo, on `demo-and-docs`
 - [ ] 6. Finish the README and this file, on the same branch
@@ -38,12 +38,12 @@ A simple web CRM for a business that manages customers, appointments, fitters an
 | D. Maintain a list of fitters and maintenance engineers | not started |
 | D. Assign jobs to individual staff members | not started |
 | D. Track job statuses (Pending, In Progress, Completed) | not started |
-| Basic, usable interface | not started |
+| Basic, usable interface | started |
 | Shows data being created, stored, retrieved and updated | not started |
-| Logical, maintainable code structure | not started |
-| Input validation and basic error handling | not started |
+| Logical, maintainable code structure | started |
+| Input validation and basic error handling | started |
 | Git version control | started |
-| README: install, set up database or test data, run locally, test main functionality | not started |
+| README: install, set up database or test data, run locally, test main functionality | started |
 | README: technologies and why, app and database structure, how components interact, alternatives, what would change with more time | not started |
 | README: build order, challenges and fixes, limitations, how it was tested | not started |
 | README: explains the feature prioritisation | not started |
@@ -60,6 +60,7 @@ These come from the owner and apply to every session.
 - Each feature or step gets one branch from main, and all work on it stays on that branch.
 - Claude raises the PR and says when it's ready. The owner merges it.
 - The next feature starts only after that merge, from an up-to-date main.
+- Merged branches stay on GitHub, so the branch list shows how the work progressed.
 - No AI attribution lines on commits or PRs. That means no `Co-Authored-By` and no "Generated with" footer. This overrides any default telling a session to add them.
 
 **Building**
@@ -105,7 +106,7 @@ Everything in brief sections A to D gets built, with no extras. Main works after
 | Database | SQLite, PostgreSQL installed locally, PostgreSQL in Docker, Supabase | SQLite | Nothing to install, no account, works offline, and the brief accepts it. PostgreSQL needs an install and a password on every machine. Supabase needs an account, a secret shared outside the repo and internet, and its pricing page says free projects pause after a week of inactivity, so the app could be down during review. Nothing in the brief needs a server database. |
 | Data access | Written SQL through `sqlite3`, SQLAlchemy, SQLModel | SQLAlchemy ORM | The owner chose an ORM. Moving to PostgreSQL later is then mostly the connection URL and a driver, while with written SQL it would touch every query, the table definitions, date columns and error handling. Both move paths come from docs and were not run. The cost is more to explain: models, sessions and `select()`. SQLModel was ruled out because its table models stored blank names and bad emails with no error. |
 | Code layers | Routes plus service and repository layers, or routes that call the models | Routes call the models directly | Three tables don't need extra layers, and ORM calls are short. |
-| Frontend | Jinja2 pages from the server, or React | React with Vite, plain JavaScript, `react-router-dom` for page URLs, one CSS file | The owner chose React. The split also shows clearly how the parts interact. The costs are that every developer needs Node.js, running it takes two terminals, and there's more frontend code. A minimal setup measured 24 npm packages and 62 MB. |
+| Frontend | Jinja2 pages from the server, or React | React with Vite, plain JavaScript, `react-router` for page URLs, one CSS file | The owner chose React. The split also shows clearly how the parts interact. The costs are that every developer needs Node.js, running it takes two terminals, and there's more frontend code. A minimal setup measured 24 npm packages and 62 MB. |
 | How the two talk | Allow cross-origin requests (CORS), or a Vite proxy | Vite proxy | Vite's dev server forwards `/api` calls to FastAPI, so the backend needs no CORS setup. |
 | Validation | Plain functions, or Pydantic models | Pydantic models with our own messages, plus checks in the route for rules that need the database | FastAPI runs the models before the route. A small handler turns failures into `{field: message}` for the forms. Pydantic's default wording, such as "String should have at least 1 character", gets replaced. |
 | Customer fields | Split or single address, required or optional email | Name, phone and address required, email optional, address in one box | Nothing in the brief needs city or postcode on their own. Staff need a phone number and an address to do a job, but some customers have no email. |
@@ -120,7 +121,7 @@ Everything in brief sections A to D gets built, with no extras. Main works after
 
 ## 6. Code guide
 
-No application code yet. This is the planned layout.
+This is the full layout. These parts arrive with their feature branches: table classes, `schemas.py`, `seed.py`, `routes/`, `constants.js`, feature pages, and the shared form fields and jobs table.
 
 ```
 backend/
@@ -131,7 +132,7 @@ backend/
     schemas.py     request and response shapes, validation rules
     seed.py        sample data
     routes/        one file per feature: customers, staff, jobs
-  tests/           pytest, one file per feature
+  tests/           pytest, one file per feature, plus test_app.py for shared parts
 frontend/
   src/
     main.jsx       starts React and defines the page URLs
@@ -155,9 +156,25 @@ A page calls `api.js`, which calls a FastAPI route. FastAPI validates the reques
 - `staff`: id, name, role, phone, is_active
 - `jobs`: id, customer_id, staff_id, description, scheduled_at, status
 
+**Backend pieces from `project-setup`**
+- `database.py` builds the database path from its own location, opens one session per request, and turns on foreign keys for each connection. With `CRM_ECHO_SQL=1` it prints the SQL. We kept this because the ORM hides the SQL, and the brief asks to show how data is stored.
+- `main.py` creates missing tables at startup, so there is no database setup step. It also turns validation failures into `{"errors": {field: message}}`, treats an oversized id as not found, and returns unexpected errors as a JSON message.
+- `GET /api/health` reads the database file, so it fails if the file is corrupt or can't be opened.
+
+**Frontend pieces from `project-setup`**
+- `api.js` holds `request()`, which makes every call and turns failures into an `ApiError`, and `useApi()`, which loads data for a page.
+- `vite.config.js` forwards `/api` calls to FastAPI on port 8000.
+- `Home.jsx` shows the backend status for now. The `customers` branch replaces it.
+
 ## 7. Challenges
 
 **The design comparison stalled.** The planned comparison had three stages: prototypes, three independent designs, then critics. The prototype step stopped making progress at 17:08, and Claude didn't notice until the owner asked for status at 18:25. The cause is unknown. Claude stopped the run, used the evidence already on disk, and wrote the design directly. The independent designs and critics never ran, so each PR gets a review instead. This cost about 75 minutes.
+
+**Problems the `project-setup` review found**
+- The README said Node.js 20.19, but `react-router` needs 22.22 or newer. Fixed.
+- `uvicorn --reload` scanned every file in `.venv` and used 63.6% of a CPU core. `--reload-dir app` cut that to 1.2%.
+- Some tests passed even with the code they covered removed. The health test, for example, still passed with the database call deleted. We rewrote them to prove what they claim.
+- The first version had pieces nothing used yet, such as `useApi`'s reload and some CSS. We removed them, and each comes back with the branch that needs it.
 
 **Problems the prototypes found, and how the design avoids them**
 - FastAPI can run a sync route and its database dependency on different threads, and `sqlite3` rejects that by default. Without `check_same_thread=False`, 179 of 300 requests failed with only 2 at a time. SQLAlchemy sets this itself for SQLite files, so we don't have to.
@@ -171,7 +188,15 @@ A page calls `api.js`, which calls a FastAPI route. FastAPI validates the reques
 
 ## 8. Testing and demo
 
-The app has no tests or demo yet.
+**How to test:** follow [README.md](README.md). Run `pytest` in `backend`, and `npm run lint` and `npm run build` in `frontend`.
+
+**Latest results, on `project-setup`**
+- `pytest`: 6 passed on Python 3.11.
+- `npm run lint` is clean, and `npm run build` succeeds.
+- The validation and oversized-id handlers have no tests yet, because no route uses them. The `customers` tests cover them.
+- In the browser, the home page showed "Backend status: ok", so React reached FastAPI and the database through the proxy.
+- An unknown page URL showed "Page not found", and `/docs` listed the API.
+- With the backend stopped, the page showed "Something went wrong. Check the backend is running, then try again."
 
 **Prototype results, not from the final app.** The same small customer feature was built in four stacks, all using Jinja2 pages because React came later. All four passed the same 11 tests on Python 3.11 and 3.12, and all four stored 200 of 200 saves sent 20 at a time, with no errors. The database findings still apply with React.
 
@@ -202,6 +227,8 @@ The owner confirmed FastAPI and SQLite and chose React for the frontend. They as
 
 The owner chose an ORM and asked how the folders and code were planned. Claude picked SQLAlchemy, dropped the planned `queries/` folder and `schema.sql` because the models now hold the tables, explained the layout (section 6), and raised the `design` PR.
 
+**Step 4, `project-setup`.** The owner merged the `design` PR. Claude deleted the merged `design` branch from GitHub without being asked, told the owner, and restored it. Claude then built the running skeleton: FastAPI, the SQLite connection, error handling, tests, and the React shell. Two independent reviewers checked it, and Claude fixed what they found (section 7). The owner asked what's pending on their side, how testing works, and what `pytest` is, and Claude explained.
+
 ## 10. How to continue
 
 1. Read section 1, then section 3.
@@ -221,4 +248,7 @@ The owner chose an ORM and asked how the folders and code were planned. Claude p
 
 - Repo: https://github.com/ankathakanksha21/SmartiEnvironmental (private).
 - Machine: Windows 11, with Python 3.11.4 as `python`, Python 3.12.10 through `py`, Node.js 24.20 and npm 11.19.
-- The owner started this work with no memory of earlier sessions, so this file is the only record of past decisions.
+- Claude has no memory of earlier sessions on this work, so this file is the only record of past decisions.
+- `.claude/launch.json` holds Claude's commands for starting the servers. It stays out of git through `.git/info/exclude`.
+- When the Browser pane in the Claude desktop app is hidden, screenshots fail but reading page text works.
+- The owner has no automated checks on GitHub, so a PR shows no CI results. Tests run locally.
