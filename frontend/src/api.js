@@ -34,9 +34,10 @@ export async function request(path, { method = 'GET', body } = {}) {
   return data
 }
 
-// Loads data for a page.
+// Loads data for a page. Call reload() to fetch it again after a change.
 export function useApi(path) {
   const [result, setResult] = useState({ data: null, error: null, loading: true })
+  const [reloads, setReloads] = useState(0)
 
   useEffect(() => {
     // If the page closes before this answer arrives, ignore the answer.
@@ -48,7 +49,7 @@ export function useApi(path) {
     return () => {
       ignore = true
     }
-  }, [path])
+  }, [path, reloads])
 
-  return result
+  return { ...result, reload: () => setReloads((count) => count + 1) }
 }

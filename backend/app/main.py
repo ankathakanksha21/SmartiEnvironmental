@@ -9,6 +9,7 @@ from sqlalchemy import text
 from sqlalchemy.orm import Session
 
 from app import database, models
+from app.routes import customers
 
 
 @asynccontextmanager
@@ -19,6 +20,7 @@ async def lifespan(app):
 
 
 app = FastAPI(title="Smarti Environmental CRM", lifespan=lifespan)
+app.include_router(customers.router)
 
 
 @app.exception_handler(RequestValidationError)

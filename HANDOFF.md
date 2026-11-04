@@ -4,11 +4,11 @@ Give a fresh session this file and the code, and it can continue without anythin
 
 ## 1. Current status
 
-- **Step we're in:** 4 of 7, building. `project-setup` is the first of four branches.
-- **On main:** this file, a README title, `.gitignore` and the design.
-- **Working branch:** `project-setup`.
-- **Open PR:** [#2](https://github.com/ankathakanksha21/SmartiEnvironmental/pull/2), `project-setup`, waiting for the owner to merge it.
-- **Next:** after that merge, `customers` starts from an up-to-date main.
+- **Step we're in:** 4 of 7, building. `customers` is the second of four branches.
+- **On main:** the design and the running skeleton from `project-setup`.
+- **Working branch:** `customers`.
+- **Open PR:** none yet.
+- **Next:** review `customers`, raise its PR, and start `staff` after the owner merges it.
 - **Deadline:** finish today, 4 November 2026.
 
 ### Plan
@@ -27,11 +27,11 @@ A simple web CRM for a business that manages customers, appointments, fitters an
 
 | Brief item | State |
 |---|---|
-| A. Add customers with name, contact details and address | not started |
-| A. View a list of customers | not started |
-| A. View and edit a customer record | not started |
-| B. Assign an onboarding status (New Enquiry, In Progress, Active) | not started |
-| B. Update the status as a customer progresses | not started |
+| A. Add customers with name, contact details and address | tested |
+| A. View a list of customers | tested |
+| A. View and edit a customer record | tested |
+| B. Assign an onboarding status (New Enquiry, In Progress, Active) | tested |
+| B. Update the status as a customer progresses | tested |
 | C. Create an appointment for a customer | not started |
 | C. Assign a date, time and staff member | not started |
 | C. View upcoming appointments | not started |
@@ -121,7 +121,7 @@ Everything in brief sections A to D gets built, with no extras. Main works after
 
 ## 6. Code guide
 
-This is the full layout. These parts arrive with their feature branches: table classes, `schemas.py`, `seed.py`, `routes/`, `constants.js`, feature pages, and the shared form fields and jobs table.
+This is the full layout. Still to come: the staff and job code, `seed.py`, and the shared jobs table.
 
 ```
 backend/
@@ -137,6 +137,7 @@ frontend/
   src/
     main.jsx       starts React and defines the page URLs
     api.js         every call to the backend goes through here
+    useForm.js     the state every form needs
     constants.js   status and role lists
     style.css
     components/    shared pieces such as form fields and the jobs table
@@ -164,11 +165,36 @@ A page calls `api.js`, which calls a FastAPI route. FastAPI validates the reques
 **Frontend pieces from `project-setup`**
 - `api.js` holds `request()`, which makes every call and turns failures into an `ApiError`, and `useApi()`, which loads data for a page.
 - `vite.config.js` forwards `/api` calls to FastAPI on port 8000.
-- `Home.jsx` shows the backend status for now. The `customers` branch replaces it.
+
+**Customers (brief A and B)**
+
+| API call | What it does |
+|---|---|
+| `GET /api/customers` | List, in name order |
+| `POST /api/customers` | Add |
+| `GET /api/customers/{id}` | View one |
+| `PUT /api/customers/{id}` | Edit name, phone, email, address |
+| `PATCH /api/customers/{id}/status` | Change onboarding status |
+
+- `routes/customers.py` holds these routes, `models.py` holds the `Customer` table, and `schemas.py` holds the rules.
+- Validation rules are small functions such as `required` and `valid_phone`. `Annotated` attaches them to a type (`RequiredText`, `Phone`), and each class lists its fields using those types.
+- Pages: `CustomerList`, `CustomerDetail`, `CustomerNew`, `CustomerEdit`. The last two share `CustomerForm`, and `useForm` holds its state.
+- `StatusForm` and `StatusBadge` are shared, because jobs have a status too.
+- Adding a status means editing three places: `models.py`, `schemas.py` and `constants.js`. An existing `crm.db` also needs deleting, because there is no migration tool.
+
+**One request traced: adding a customer**
+1. `CustomerNew.jsx` calls `request('/customers', { method: 'POST', body: values })` when the form is submitted.
+2. Vite forwards the call to FastAPI.
+3. FastAPI checks the body against `CustomerCreate` in `schemas.py`. If a rule fails, the handler in `main.py` returns `{"errors": {field: message}}` with status 422. `useForm` stores those errors, and `Field` shows each one under its input.
+4. If the input is valid, `create_customer` in `routes/customers.py` builds a `Customer` object, then `db.add()` and `db.commit()` make SQLAlchemy run the INSERT.
+5. FastAPI turns the object into JSON using `CustomerOut`, and returns it with status 201.
+6. `CustomerNew.jsx` uses the returned `id` to open the customer's page, which fetches the record again with `useApi`.
 
 ## 7. Challenges
 
 **The design comparison stalled.** The planned comparison had three stages: prototypes, three independent designs, then critics. The prototype step stopped making progress at 17:08, and Claude didn't notice until the owner asked for status at 18:25. The cause is unknown. Claude stopped the run, used the evidence already on disk, and wrote the design directly. The independent designs and critics never ran, so each PR gets a review instead. This cost about 75 minutes.
+
+**The API stopped working in the browser after a branch switch.** Pages said "Something went wrong" and `/api/customers` through Vite returned HTML, although the backend answered correctly on its own. Vite's log showed `git checkout` had rewritten `vite.config.js`, and the automatic restart that followed lost the proxy. Restarting `npm run dev` fixed it, and the README now says so.
 
 **Problems the `project-setup` review found**
 - The README said Node.js 20.19, but `react-router` needs 22.22 or newer. Fixed.
@@ -190,13 +216,21 @@ A page calls `api.js`, which calls a FastAPI route. FastAPI validates the reques
 
 **How to test:** follow [README.md](README.md). Run `pytest` in `backend`, and `npm run lint` and `npm run build` in `frontend`.
 
-**Latest results, on `project-setup`**
-- `pytest`: 6 passed on Python 3.11.
+**Latest results, on `customers`**
+- `pytest`: 36 passed on Python 3.11. These cover the validation and oversized-id handlers that had no tests before.
 - `npm run lint` is clean, and `npm run build` succeeds.
-- The validation and oversized-id handlers have no tests yet, because no route uses them. The `customers` tests cover them.
-- In the browser, the home page showed "Backend status: ok", so React reached FastAPI and the database through the proxy.
-- An unknown page URL showed "Page not found", and `/docs` listed the API.
-- With the backend stopped, the page showed "Something went wrong. Check the backend is running, then try again."
+- The frontend has no automated tests. Its pages get checked in the browser.
+
+**Browser check of the customer pages**
+- Saving a blank form showed an error under each required field.
+- A bad phone and email each showed their own error, and the typed values stayed in the form.
+- A valid customer saved, and their page opened.
+- A status update changed the badge and was still there after a reload.
+- An edit changed the name and cleared the email, and the status stayed the same.
+- The list showed the customer, and `/customers/999` showed "Customer not found."
+- With the Browser pane not drawing, clicks failed, so the blank-name edit and the later save were triggered from JavaScript on the real buttons.
+
+**Earlier, on `project-setup`:** an unknown page URL showed "Page not found", `/docs` listed the API, and with the backend stopped the page showed "Something went wrong. Check the backend is running, then try again."
 
 **Prototype results, not from the final app.** The same small customer feature was built in four stacks, all using Jinja2 pages because React came later. All four passed the same 11 tests on Python 3.11 and 3.12, and all four stored 200 of 200 saves sent 20 at a time, with no errors. The database findings still apply with React.
 
@@ -227,7 +261,9 @@ The owner confirmed FastAPI and SQLite and chose React for the frontend. They as
 
 The owner chose an ORM and asked how the folders and code were planned. Claude picked SQLAlchemy, dropped the planned `queries/` folder and `schema.sql` because the models now hold the tables, explained the layout (section 6), and raised the `design` PR.
 
-**Step 4, `project-setup`.** The owner merged the `design` PR. Claude deleted the merged `design` branch from GitHub without being asked, told the owner, and restored it. Claude then built the running skeleton: FastAPI, the SQLite connection, error handling, tests, and the React shell. Two independent reviewers checked it, and Claude fixed what they found (section 7). The owner asked what's pending on their side, how testing works, and what `pytest` is, and Claude explained.
+**Step 4, `project-setup`.** The owner merged the `design` PR. Claude deleted the merged `design` branch from GitHub without being asked, told the owner, and restored it. Claude then built the running skeleton: FastAPI, the SQLite connection, error handling, tests, and the React shell. Two independent reviewers checked it, and Claude fixed what they found (section 7). The owner asked what's pending on their side, how testing works, and what `pytest` is, and Claude explained. The owner merged the PR.
+
+**Step 4, `customers`.** Claude built the customer API, validation rules and 30 more tests, then the React pages, and checked each flow in the browser.
 
 ## 10. How to continue
 
