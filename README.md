@@ -46,7 +46,9 @@ npm install
 npm run dev
 ```
 
-Open http://localhost:5173. The page should say "Backend status: ok".
+Open http://localhost:5173. You should see the Customers page.
+
+If you switch git branches while `npm run dev` is running, stop it and start it again. A branch switch can make Vite restart itself and lose its link to the backend.
 
 ### 3. Run the tests
 
@@ -55,3 +57,12 @@ With the virtual environment active, in the `backend` folder:
 ```bash
 pytest
 ```
+
+### 4. Try the main features
+
+**Customers**
+1. Click **Add customer**, then click the button on the form without filling anything in. Each required field shows an error.
+2. Fill in the form and save. The customer's page opens.
+3. Under **Onboarding status**, choose another status and click **Update status**.
+4. Click **Edit details**, change something and save.
+5. Click **Customers** in the header. The list shows your customer with its status.

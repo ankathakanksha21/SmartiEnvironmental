@@ -1,4 +1,4 @@
-import { Link, Outlet } from 'react-router'
+import { Link, NavLink, Outlet } from 'react-router'
 
 // The header shown on every page. The current page appears in <Outlet />.
 export default function Layout() {
@@ -9,6 +9,9 @@ export default function Layout() {
           <Link to="/" className="site-name">
             Smarti CRM
           </Link>
+          <nav className="site-nav">
+            <NavLink to="/customers">Customers</NavLink>
+          </nav>
         </div>
       </header>
       <main className="container">

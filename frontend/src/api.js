@@ -34,21 +34,31 @@ export async function request(path, { method = 'GET', body } = {}) {
   return data
 }
 
-// Loads data for a page.
+// Loads data for a page. Call reload() to fetch it again after a change.
 export function useApi(path) {
-  const [result, setResult] = useState({ data: null, error: null, loading: true })
+  const [result, setResult] = useState({ path: null, data: null, error: null })
+  const [reloads, setReloads] = useState(0)
 
   useEffect(() => {
     // If the page closes before this answer arrives, ignore the answer.
     let ignore = false
     request(path).then(
-      (data) => !ignore && setResult({ data, error: null, loading: false }),
-      (error) => !ignore && setResult({ data: null, error, loading: false }),
+      (data) => !ignore && setResult({ path, data, error: null }),
+      (error) => !ignore && setResult({ path, data: null, error }),
     )
     return () => {
       ignore = true
     }
-  }, [path])
+  }, [path, reloads])
 
-  return result
+  // The answer may belong to another record if the URL's id just changed. Reporting
+  // "loading" makes the page remove its form, so the form can't save old values
+  // over the new record.
+  const loading = result.path !== path
+  return {
+    data: loading ? null : result.data,
+    error: loading ? null : result.error,
+    loading,
+    reload: () => setReloads((count) => count + 1),
+  }
 }
