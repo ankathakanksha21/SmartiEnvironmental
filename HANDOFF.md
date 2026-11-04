@@ -4,10 +4,10 @@ Give a fresh session this file and the code, and it can continue without anythin
 
 ## 1. Current status
 
-- **Step we're in:** finished. All 7 steps are done.
+- **Step we're in:** the 7 planned steps are done. The owner then asked for a design-only change, which is on the `ui-design` branch.
 - **On main:** all of brief sections A to D, the sample data and the final README.
-- **Open PR:** none.
-- **Next:** the owner tries the app, gives the assessor access to the private repo, and presents the work. New work starts only if the owner asks.
+- **Open PR:** none yet.
+- **Next:** review `ui-design` and raise its PR. After the merge, run `npm install` in `frontend` and restart `npm run dev`, because the change adds a font package. New work starts only if the owner asks.
 
 ### Plan
 
@@ -122,6 +122,8 @@ Everything in brief sections A to D got built. The one small extra is the Overdu
 | Booking rules | None, or basic checks | No booking in the past, and no two open jobs for one staff member at the same date and time | These are the two mistakes a booking form should catch. With no job durations, only exact matches count as a clash. |
 | Missed visits | Let them vanish from Upcoming, or label them | An Overdue label under All jobs | Upcoming only shows future jobs, so a missed visit would otherwise look fine. The owner approved this in the design. |
 | Where to book from | The jobs page only, or customer pages too | Both | The brief says to create an appointment for a customer, so a customer's page has **Book a job**. The owner approved this in the design. |
+| Look and feel | Keep the first version, or restyle | White header with pill navigation, cards with soft shadows, no underlined links, roomier spacing | The owner asked for a design refresh with no change in behaviour. Only `style.css`, the favicon and one import in `main.jsx` changed. |
+| Font | System fonts, a Google Fonts link, or a package | Plus Jakarta Sans through `@fontsource-variable/plus-jakarta-sans` | The package works offline and needs no extra setup step beyond `npm install`. A Google Fonts link would need internet to look right. |
 | Where this file lives | Committed, or local only | Committed to the repo root | It's backed up, and a fresh session gets it with one clone. It holds no prompts. |
 | AI attribution lines | Keep, or remove | Removed | The owner's choice. |
 | AI mention in the README | One line, or none | None | The owner's choice. |
@@ -330,6 +332,8 @@ The owner chose an ORM and asked how the folders and code were planned. Claude p
 
 **Step 5, `demo-and-docs`.** Claude added the sample data and final README, took screenshots to check how the pages look, tested from a fresh clone on both Python versions, and ran the full demo against the brief. Three reviewers then acted as a new developer, a brief auditor and an editor. They found every brief line met and no code bug, plus documentation fixes, which Claude made before raising the last PR. Claude pointed out that this file names Claude and is visible to anyone with repo access. The owner merged the PR, and Claude confirmed that main passes every check.
 
+**After the plan, `ui-design`.** The owner tried the app, asked how to test it by hand, and added their own test customer. They then asked for a design refresh with the same functionality: colours, font, sizes, spacing, cards instead of boxes, and no green underlines. Claude restyled the app on the `ui-design` branch, using a scratch copy for any test that writes data, so the owner's data stayed untouched.
+
 ## 10. How to continue
 
 1. Read section 1, then section 3.
@@ -355,6 +359,8 @@ The owner chose an ORM and asked how the folders and code were planned. Claude p
 - `.claude/launch.json` holds Claude's commands for starting the servers. It stays out of git through `.git/info/exclude`.
 - When the Browser pane in the Claude desktop app is hidden, screenshots fail but reading page text works. Headless Chrome can take screenshots instead.
 - Stopping a server that was started through a Git Bash wrapper left its Vite process running. Check ports 8000 and 5173 before trusting what answers there.
+- A running Vite server can't find a package installed after it started, and the page goes blank with a 500 error. Restart `npm run dev` after `npm install`.
+- `playwright-core` with the installed Chrome (`channel: 'chrome'`) gives real clicks and screenshots even when the Browser pane is hidden. Keep it in a scratch folder, because the project doesn't need it.
 - The repo has no automated checks on GitHub, so a PR shows no CI results. Tests run locally.
 - Known limitations are in the README. In testing, simultaneous requests double-booked 4 of 10 slots in one run and 8 of 10 in another.
 - The README is written in the owner's voice and leaves out AI by the owner's choice, while this file records how the work was done.
