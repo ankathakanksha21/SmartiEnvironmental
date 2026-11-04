@@ -7,6 +7,10 @@ import CustomerEdit from './pages/CustomerEdit.jsx'
 import CustomerList from './pages/CustomerList.jsx'
 import CustomerNew from './pages/CustomerNew.jsx'
 import NotFound from './pages/NotFound.jsx'
+import StaffDetail from './pages/StaffDetail.jsx'
+import StaffEdit from './pages/StaffEdit.jsx'
+import StaffList from './pages/StaffList.jsx'
+import StaffNew from './pages/StaffNew.jsx'
 import './style.css'
 
 createRoot(document.getElementById('root')).render(
@@ -19,6 +23,10 @@ createRoot(document.getElementById('root')).render(
           <Route path="customers/new" element={<CustomerNew />} />
           <Route path="customers/:id" element={<CustomerDetail />} />
           <Route path="customers/:id/edit" element={<CustomerEdit />} />
+          <Route path="staff" element={<StaffList />} />
+          <Route path="staff/new" element={<StaffNew />} />
+          <Route path="staff/:id" element={<StaffDetail />} />
+          <Route path="staff/:id/edit" element={<StaffEdit />} />
           <Route path="*" element={<NotFound />} />
         </Route>
       </Routes>

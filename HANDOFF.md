@@ -4,11 +4,11 @@ Give a fresh session this file and the code, and it can continue without anythin
 
 ## 1. Current status
 
-- **Step we're in:** 4 of 7, building. `customers` is the second of four branches.
-- **On main:** the design and the running skeleton from `project-setup`.
-- **Working branch:** `customers`.
-- **Open PR:** [#3](https://github.com/ankathakanksha21/SmartiEnvironmental/pull/3), `customers`, waiting for the owner to merge it.
-- **Next:** after that merge, `staff` starts from an up-to-date main.
+- **Step we're in:** 4 of 7, building. `staff` is the third of four branches.
+- **On main:** the design, the running skeleton, and customers with onboarding status.
+- **Working branch:** `staff`.
+- **Open PR:** none yet.
+- **Next:** review `staff`, raise its PR, and start `jobs` after the owner merges it.
 - **Deadline:** finish today, 4 November 2026.
 
 ### Plan
@@ -35,7 +35,7 @@ A simple web CRM for a business that manages customers, appointments, fitters an
 | C. Create an appointment for a customer | not started |
 | C. Assign a date, time and staff member | not started |
 | C. View upcoming appointments | not started |
-| D. Maintain a list of fitters and maintenance engineers | not started |
+| D. Maintain a list of fitters and maintenance engineers | tested |
 | D. Assign jobs to individual staff members | not started |
 | D. Track job statuses (Pending, In Progress, Completed) | not started |
 | Basic, usable interface | started |
@@ -122,7 +122,7 @@ Everything in brief sections A to D gets built, with no extras. Main works after
 
 ## 6. Code guide
 
-This is the full layout. Still to come: the staff and job code, `seed.py`, and the shared jobs table.
+This is the full layout. Still to come: the job code, `seed.py`, and the shared jobs table.
 
 ```
 backend/
@@ -183,6 +183,19 @@ A page calls `api.js`, which calls a FastAPI route. FastAPI validates the reques
 - Adding a status means editing three places: `schemas.py`, `constants.js`, and `style.css` for its badge colour.
 - `useApi` reports `loading` until the answer for the current URL arrives. Pages remove their forms while loading, so a form can't save one record's values over another.
 
+**Staff (the list in brief D)**
+
+| API call | What it does |
+|---|---|
+| `GET /api/staff` | List, in name order, including inactive staff |
+| `POST /api/staff` | Add |
+| `GET /api/staff/{id}` | View one |
+| `PUT /api/staff/{id}` | Edit name, role, phone, active flag |
+
+- The code follows the same pattern as customers: `routes/staff.py`, `Staff` in `models.py`, `StaffDetails` and `StaffOut` in `schemas.py`.
+- Pages: `StaffList`, `StaffDetail`, `StaffNew`, `StaffEdit`. The last two share `StaffForm`.
+- There is no delete. Unticking **Active** on the edit form is how someone leaves the booking list.
+
 **One request traced: adding a customer**
 1. `CustomerNew.jsx` calls `request('/customers', { method: 'POST', body: values })` when the form is submitted.
 2. Vite forwards the call to FastAPI.
@@ -222,10 +235,16 @@ A page calls `api.js`, which calls a FastAPI route. FastAPI validates the reques
 
 **How to test:** follow [README.md](README.md). Run `pytest` in `backend`, and `npm run lint` and `npm run build` in `frontend`.
 
-**Latest results, on `customers`**
-- `pytest`: 38 passed on Python 3.11. These cover the validation and oversized-id handlers that had no tests before.
+**Latest results, on `staff`**
+- `pytest`: 56 passed on Python 3.11.
 - `npm run lint` is clean, and `npm run build` succeeds.
 - The frontend has no automated tests. Its pages get checked in the browser.
+
+**Browser check of the staff pages**, run by calling `click()` from JavaScript on the real page, because the Browser pane was hidden
+- A blank form showed errors for name and phone, and a bad phone kept the typed name.
+- A valid staff member saved as Active, and the add form has no active checkbox.
+- The edit form showed Active ticked. Unticking it and saving changed the status to Inactive.
+- The list showed both staff in name order with their status.
 
 **Browser check of the customer pages**
 - Saving a blank form showed an error under each required field.
@@ -271,7 +290,9 @@ The owner chose an ORM and asked how the folders and code were planned. Claude p
 
 **Step 4, `project-setup`.** The owner merged the `design` PR. Claude deleted the merged `design` branch from GitHub without being asked, told the owner, and restored it. Claude then built the running skeleton: FastAPI, the SQLite connection, error handling, tests, and the React shell. Two independent reviewers checked it, and Claude fixed what they found (section 7). The owner asked what's pending on their side, how testing works, and what `pytest` is, and Claude explained. The owner merged the PR.
 
-**Step 4, `customers`.** Claude built the customer API, validation rules and tests, then the React pages, and checked each flow in the browser. Two independent reviewers found a data-loss bug and some weak tests, and Claude fixed them (section 7).
+**Step 4, `customers`.** Claude built the customer API, validation rules and tests, then the React pages, and checked each flow in the browser. Two independent reviewers found a data-loss bug and some weak tests, and Claude fixed them (section 7). The owner merged the PR.
+
+**Step 4, `staff`.** Claude built the staff API, tests and pages, following the customer pattern, and checked each flow in the browser.
 
 ## 10. How to continue
 

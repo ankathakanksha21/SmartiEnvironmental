@@ -16,3 +16,14 @@ class Customer(Base):
     email: Mapped[str]  # Blank when the customer has no email address.
     address: Mapped[str]
     onboarding_status: Mapped[str]  # schemas.py lists the allowed values.
+
+
+class Staff(Base):
+    __tablename__ = "staff"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    name: Mapped[str]
+    role: Mapped[str]  # schemas.py lists the allowed values.
+    phone: Mapped[str]
+    # Someone who leaves is marked inactive, so their past jobs keep their name.
+    is_active: Mapped[bool]

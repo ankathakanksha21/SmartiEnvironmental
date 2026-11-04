@@ -66,3 +66,7 @@ pytest
 3. Under **Onboarding status**, choose another status and click **Update status**.
 4. Click **Edit details**, change something and save.
 5. Click **Customers** in the header. The list shows your customer with its status.
+
+**Staff**
+1. Click **Staff**, then **Add staff member**. Add a fitter and a maintenance engineer.
+2. Open one, click **Edit details**, untick **Active** and save. Their status changes to Inactive, and they stay in the list.
