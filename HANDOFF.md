@@ -6,8 +6,8 @@ Give a fresh session this file and the code, and it can continue without anythin
 
 - **Step we're in:** the 7 planned steps are done. The owner then asked for a design-only change, which is on the `ui-design` branch.
 - **On main:** all of brief sections A to D, the sample data and the final README.
-- **Open PR:** none yet.
-- **Next:** review `ui-design` and raise its PR. After the merge, run `npm install` in `frontend` and restart `npm run dev`, because the change adds a font package. New work starts only if the owner asks.
+- **Open PR:** [#8](https://github.com/ankathakanksha21/SmartiEnvironmental/pull/8), `ui-design`, waiting for the owner to merge it.
+- **Next:** after that merge, run `npm install` in `frontend` and restart `npm run dev`, because the change adds a font package. New work starts only if the owner asks.
 
 ### Plan
 
@@ -336,7 +336,7 @@ The owner chose an ORM and asked how the folders and code were planned. Claude p
 
 **Step 5, `demo-and-docs`.** Claude added the sample data and final README, took screenshots to check how the pages look, tested from a fresh clone on both Python versions, and ran the full demo against the brief. Three reviewers then acted as a new developer, a brief auditor and an editor. They found every brief line met and no code bug, plus documentation fixes, which Claude made before raising the last PR. Claude pointed out that this file names Claude and is visible to anyone with repo access. The owner merged the PR, and Claude confirmed that main passes every check.
 
-**After the plan, `ui-design`.** The owner tried the app, asked how to test it by hand, and added their own test customer. They then asked for a design refresh with the same functionality: colours, font, sizes, spacing, cards instead of boxes, and no green underlines. Claude restyled the app on the `ui-design` branch, using a scratch copy for any test that writes data, so the owner's data stayed untouched.
+**After the plan, `ui-design`.** The owner tried the app, asked how to test it by hand, and added their own test customer. They then asked for a design refresh with the same functionality: colours, font, sizes, spacing, cards instead of boxes, and no green underlines. Claude restyled the app on the `ui-design` branch, using a scratch copy for any test that writes data, so the owner's data stayed untouched. Two independent reviewers checked the look, accessibility and behaviour, and Claude fixed what they found (section 7), then raised the PR.
 
 ## 10. How to continue
 
