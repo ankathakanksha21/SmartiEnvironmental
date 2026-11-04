@@ -6,6 +6,7 @@ Give a fresh session this file and the code, and it can continue without anythin
 
 - **Step we're in:** 3 of 7, comparing stacks and agreeing the design.
 - **On main:** this file, a README title and `.gitignore`.
+- **Working branch:** `design`, for this step's notes and decisions.
 - **Open PR:** none.
 - **Next:** the owner approves the stack and design, then the first feature branch starts.
 - **Deadline:** finish today, 4 November 2026.
@@ -65,7 +66,8 @@ These come from the owner and apply to every session.
 - Take the minimal path, and don't over-complicate.
 - Add no features beyond the brief.
 - No temporary fixes or shortcuts. Everything built must be finished and working.
-- Give the reasoning behind each decision.
+- Within that minimal path, aim for the best approach and the best decisions.
+- Work through decisions with the owner, and give the reasoning behind each one.
 - If an instruction is unclear, ask instead of assuming.
 
 **Writing**
@@ -74,7 +76,7 @@ These come from the owner and apply to every session.
 - The README does not mention Claude Code.
 - This file holds summaries, never the owner's prompts word for word.
 - Setup steps live only in the README, and this file links to them.
-- Update this file on each branch before asking the owner to merge.
+- Record notes, results and decisions in this file at every step, and bring it up to date on the branch before asking the owner to merge.
 
 ## 4. Feature priorities
 
@@ -110,7 +112,9 @@ No tests or demo yet.
 
 **Step 2.** The owner chose one Job record, suggested FastAPI with PostgreSQL or Supabase while staying open to alternatives, set the branch and merge rule, and asked for summaries instead of prompts in this file. Claude proposed ten sections for this file and started comparing stacks with working prototypes in a scratch folder.
 
-**Step 3.** The owner approved the ten sections and asked that current state, results, notes, the current step and the plan be included too. They also set today as the deadline, asked to remove the attribution lines, and asked to keep AI out of the README. They confirmed that each feature starts only after the previous one is merged. Claude made the first commit.
+**Step 3.** The owner approved the ten sections and asked that current state, results, notes, the current step and the plan be included too. They also set today as the deadline, asked to remove the attribution lines, and asked to keep AI out of the README. They confirmed that each feature starts only after the previous one is merged, and asked for the minimal path with no temporary fixes, the best decisions with reasoning for each, and notes in this file at every step. Claude made the first commit.
+
+The owner then asked whether Claude had missed the rest of that message. Claude had recorded most of it but not acknowledged it in its reply, and this file was missing the rule on notes at every step and the rule on best decisions. Claude added both.
 
 ## 10. How to continue
 
