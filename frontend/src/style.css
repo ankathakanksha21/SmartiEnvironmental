@@ -8,15 +8,16 @@
   --green: #5bb906;
   --muted: #5a6a84;
   --border: #dde6ee;
-  --border-strong: #b9c7d4;
+  --border-strong: #8391a3;
   --background: #f3f7fa;
   --surface: #ffffff;
   --error: #b42318;
   --error-soft: #fef3f2;
   --error-border: #fecdca;
   --shadow-card: 0 1px 2px rgba(37, 53, 81, 0.05), 0 6px 20px rgba(37, 53, 81, 0.06);
-  /* A hand-drawn green stroke that stretches to fit the text above it. */
-  --marker: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 300 14' preserveAspectRatio='none'%3E%3Cpath d='M3 9C60 7 120 6 180 6s95 .5 117 1.5' fill='none' stroke='%235bb906' stroke-width='4' stroke-linecap='round' vector-effect='non-scaling-stroke'/%3E%3C/svg%3E");
+  /* Hand-drawn green strokes that stretch to fit the text above them. */
+  --marker: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 300 14' preserveAspectRatio='none'%3E%3Cpath d='M3 11C60 7.5 120 5.5 180 5.5s95 .5 117 2' fill='none' stroke='%235bb906' stroke-width='5' stroke-linecap='round' vector-effect='non-scaling-stroke'/%3E%3C/svg%3E");
+  --marker-small: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 300 14' preserveAspectRatio='none'%3E%3Cpath d='M15 9C75 7 135 6 190 6s75 .5 95 1.5' fill='none' stroke='%235bb906' stroke-width='3' stroke-linecap='round' vector-effect='non-scaling-stroke'/%3E%3C/svg%3E");
 }
 
 * {
@@ -33,10 +34,11 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
+/* The negative margin lets the stroke start just before the text without moving the text. */
 h1 {
   width: fit-content;
-  margin: 0 0 28px;
-  padding-bottom: 10px;
+  margin: 0 0 32px -6px;
+  padding: 0 8px 4px 6px;
   background: var(--marker) left bottom / 100% 12px no-repeat;
   font-size: 34px;
   font-weight: 500;
@@ -49,22 +51,29 @@ h2 {
   font-weight: 500;
 }
 
+/* Green is kept for headings and the current page. Links turn green on hover. */
 a {
   color: var(--navy);
   font-weight: 500;
   text-decoration: underline;
-  text-decoration-color: var(--green);
-  text-decoration-thickness: 2px;
+  text-decoration-color: var(--sky);
+  text-decoration-thickness: 1px;
   text-underline-offset: 4px;
 }
 
 a:hover {
   color: var(--sky-text);
+  text-decoration-color: var(--green);
+  text-decoration-thickness: 2px;
 }
 
 :focus-visible {
-  outline: 2px solid var(--sky);
+  outline: 2px solid var(--sky-text);
   outline-offset: 2px;
+}
+
+.site-header :focus-visible {
+  outline-color: var(--sky);
 }
 
 .container {
@@ -118,7 +127,7 @@ main > p {
 }
 
 .site-nav a {
-  padding: 4px 2px 10px;
+  padding: 4px 2px 7px;
   color: #ffffff;
   font-weight: 400;
   text-decoration: none;
@@ -129,7 +138,7 @@ main > p {
 }
 
 .site-nav a.active {
-  background: var(--marker) left bottom / 100% 8px no-repeat;
+  background: var(--marker-small) left bottom / 100% 8px no-repeat;
   color: #ffffff;
   font-weight: 500;
 }
@@ -141,11 +150,11 @@ main > p {
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  margin-bottom: 28px;
+  margin-bottom: 32px;
 }
 
 .page-header h1 {
-  margin: 0;
+  margin: 0 0 0 -6px;
 }
 
 .section-header {
@@ -169,8 +178,8 @@ main > p {
 }
 
 .view-tabs a {
-  padding: 2px 2px 9px;
-  color: var(--muted);
+  padding: 2px 2px 6px;
+  color: var(--sky-text);
   text-decoration: none;
 }
 
@@ -179,7 +188,7 @@ main > p {
 }
 
 .view-tabs a.active {
-  background: var(--marker) left bottom / 100% 8px no-repeat;
+  background: var(--marker-small) left bottom / 100% 8px no-repeat;
   color: var(--navy);
 }
 
@@ -231,7 +240,7 @@ button:disabled {
 .form,
 .status-form-row {
   border: 1px solid var(--border);
-  border-radius: 6px;
+  border-radius: 4px;
   background: var(--surface);
   box-shadow: var(--shadow-card);
 }
@@ -342,8 +351,13 @@ select {
   padding-bottom: 0;
 }
 
+/* Swaps the browser's thin arrow for a bold navy one. It's still a normal dropdown. */
 select {
-  padding-left: 8px;
+  padding-right: 38px;
+  appearance: none;
+  background: var(--surface)
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 14 9'%3E%3Cpath d='M1.5 1.5 7 7l5.5-5.5' fill='none' stroke='%23253551' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")
+    right 14px center / 14px 9px no-repeat;
 }
 
 input:focus,
@@ -467,7 +481,7 @@ textarea:focus {
   margin-bottom: 20px;
   padding: 14px 18px;
   border: 1px solid var(--error-border);
-  border-radius: 6px;
+  border-radius: 4px;
   background: var(--error-soft);
   color: var(--error);
   font-size: 14px;
@@ -490,6 +504,15 @@ textarea:focus {
   color: #8f1c13;
 }
 
+/* iPhones zoom into any field smaller than 16px when it's tapped. */
+@media (pointer: coarse) {
+  input,
+  select,
+  textarea {
+    font-size: 16px;
+  }
+}
+
 /* Narrow screens */
 @media (max-width: 600px) {
   .container {
@@ -506,13 +529,6 @@ textarea:focus {
     font-size: 27px;
   }
 
-  /* iPhones zoom into any field smaller than 16px when it's tapped. */
-  input,
-  select,
-  textarea {
-    font-size: 16px;
-  }
-
   th,
   td {
     padding: 12px 14px;
@@ -522,6 +538,12 @@ textarea:focus {
   th:first-child,
   td:first-child {
     padding-left: 20px;
+  }
+
+  /* A job's description can be long, so it wraps. Other tables only have a badge here. */
+  td:nth-child(4) {
+    min-width: 220px;
+    white-space: normal;
   }
 
   .details {
