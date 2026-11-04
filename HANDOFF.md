@@ -290,12 +290,35 @@ A page calls `api.js`, which calls a FastAPI route. FastAPI validates the reques
 
 **How to test:** follow [README.md](README.md). Run `pytest` in `backend`, and `npm run lint` and `npm run build` in `frontend`.
 
-**Latest results, on `jobs`**
-- `pytest`: 112 passed on Python 3.11.
-- `npm run lint` is clean, and `npm run build` succeeds.
+**Latest results, on `demo-and-docs`, from a fresh clone of GitHub**
+- `pytest`: 114 passed on Python 3.11.4 and on Python 3.12.10.
+- `npm run lint` is clean, and `npm run build` succeeds on Node.js 24.20.
+- Both servers started with the README's exact commands in Git Bash, and `python -m app.seed` added the sample data.
+- `git status` stayed clean afterwards, so nothing the app or tests create gets committed.
 - The frontend has no automated tests. Its pages get checked in the browser.
 
-**Browser check of the job pages**, run by calling `click()` from JavaScript on the real page, because the Browser pane was hidden
+**Demo script**
+
+Start both servers, add the sample data, and open http://localhost:5173. Every step below passed on the fresh clone. The steps ran by calling `click()` from JavaScript on the real page, because the Browser pane was hidden.
+
+| Brief item | What to do | What you should see |
+|---|---|---|
+| A. List customers | Open the app | The customer list, in name order |
+| A. Validation | Click **Add customer**, then submit it blank | An error under name, phone and address |
+| A. Add a customer | Fill in the form with a bad email, then correct it | The email error appears and the typed values stay, then the customer's page opens |
+| A. Edit a customer | Click **Edit details** and change the address | The new address on their page |
+| B. Assign a status | Choose a status on the add form | It shows on the customer's page |
+| B. Update a status | Change it to In Progress, then Active | The badge changes each time |
+| C. Create an appointment | Click **Book a job** on the customer's page | The form opens with that customer selected |
+| C. Date, time, staff | Choose a past date, then a future one, and a staff member | The past date is refused, then the job's page opens as Pending |
+| C. Upcoming appointments | Click **Jobs** | The job appears, soonest first |
+| D. Staff list | Click **Staff** | Fitters and engineers, with Lena Fox Inactive |
+| D. Assign to staff | Open the booking form, then Sam Patel's page | Lena Fox isn't offered, and Sam's page lists his jobs |
+| D. Double booking | Book Sam at the same date and time again | "This staff member already has an open job at that time." |
+| D. Job status | On the job's page, choose In Progress, then Completed | The badge changes, and the job leaves Upcoming but stays in All jobs |
+| Extra | Click **All jobs** | Survey the site shows Overdue |
+
+**Browser check of the job pages**, run the same way, on `jobs`
 - A blank form showed an error for all four fields. A past date was refused and the typed description stayed.
 - The staff dropdown left out inactive staff. A valid job saved as Pending and appeared under Upcoming.
 - A second booking for the same person and time was refused. A different time saved.
@@ -363,7 +386,7 @@ The owner chose an ORM and asked how the folders and code were planned. Claude p
 
 **Step 4, `jobs`.** Claude built the job API, the booking rules and tests, then the job pages, and added job lists to the customer and staff pages. Each flow got checked in the browser. Three independent reviewers found dead code, a raw date error and some weak tests, and Claude fixed them (section 7). While the review ran, the owner asked who the end users are, and how long is left. Claude said office staff are the users, that fitters and engineers would be the natural next users if login existed, and that about an hour remained. The owner merged the PR.
 
-**Step 5, `demo-and-docs`.** Claude added the sample data and final README, took screenshots to check how the pages look, and tested from a fresh clone.
+**Step 5, `demo-and-docs`.** Claude added the sample data and final README, took screenshots to check how the pages look, tested from a fresh clone on both Python versions, and ran the full demo against the brief.
 
 ## 10. How to continue
 
