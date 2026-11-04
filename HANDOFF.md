@@ -122,7 +122,7 @@ Everything in brief sections A to D got built. The one small extra is the Overdu
 | Booking rules | None, or basic checks | No booking in the past, and no two open jobs for one staff member at the same date and time | These are the two mistakes a booking form should catch. With no job durations, only exact matches count as a clash. |
 | Missed visits | Let them vanish from Upcoming, or label them | An Overdue label under All jobs | Upcoming only shows future jobs, so a missed visit would otherwise look fine. The owner approved this in the design. |
 | Where to book from | The jobs page only, or customer pages too | Both | The brief says to create an appointment for a customer, so a customer's page has **Book a job**. The owner approved this in the design. |
-| Look and feel | Keep the first version, or restyle | White header with pill navigation, cards with soft shadows, no underlined links, roomier spacing | The owner asked for a design refresh with no change in behaviour. Only `style.css`, the favicon and one import in `main.jsx` changed. |
+| Look and feel | Keep the first version, or restyle | White header with pill navigation, cards with soft shadows, no underlined links, roomier spacing | The owner asked for a design refresh with no change in behaviour. Only `style.css`, the favicon, one import in `main.jsx` and the font package in `package.json` and its lock file changed. |
 | Font | System fonts, a Google Fonts link, or a package | Plus Jakarta Sans through `@fontsource-variable/plus-jakarta-sans` | The package works offline and needs no extra setup step beyond `npm install`. A Google Fonts link would need internet to look right. |
 | Where this file lives | Committed, or local only | Committed to the repo root | It's backed up, and a fresh session gets it with one clone. It holds no prompts. |
 | AI attribution lines | Keep, or remove | Removed | The owner's choice. |
@@ -223,6 +223,8 @@ Pages: `StaffList`, `StaffDetail`, `StaffNew`, `StaffEdit`. The last two share `
 
 **The API stopped working in the browser after a branch switch.** Pages said "Something went wrong" and `/api/customers` through Vite returned HTML, although the backend answered correctly on its own. Vite's log showed `git checkout` had rewritten `vite.config.js`, and the automatic restart that followed lost the proxy. Restarting `npm run dev` fixed it, and the README says so.
 
+**The design review on `ui-design`.** A visual reviewer found that the phone header had lost its padding, that form buttons ignored the word spacing so "Book job" read as "Bookjob", and that phone numbers wrapped in phone-sized tables. An accessibility reviewer found that removing the focus outline left the checkbox and error fields with almost no visible focus, and that fields under 16px make iPhones zoom in when tapped. Claude fixed all of these. All text colours passed the 4.5:1 contrast check.
+
 **What each review found, and Claude fixed**
 
 | Branch | Finding | Fix |
@@ -265,6 +267,8 @@ The first commit message on `staff` says unticking Active takes someone off the 
 - `git status` stayed clean afterwards, so nothing the app or tests create gets committed.
 - In the final review, an auditor walked every line of the brief and found all of it met, with no code bug. A second reviewer followed the README as a new developer, and every step worked.
 - The frontend has no automated tests. Its pages get checked in the browser.
+
+**Results on `ui-design`:** `pytest` 114 passed, `npm run lint` clean, `npm run build` succeeds. A throwaway Playwright script in a scratch folder walked the whole app with real clicks and key presses on a scratch copy of the app, and all its checks passed. Screenshots of 11 pages or states at 1280px and 390px wide showed no sideways scrolling and no console errors.
 
 **Demo script**
 

@@ -80,6 +80,21 @@ main > p {
   color: var(--muted);
 }
 
+/* Form pages have no button beside the title, so this keeps the title at the same height. */
+main > h1 {
+  display: flex;
+  align-items: center;
+  min-height: 44px;
+}
+
+/* Browsers don't pass word spacing down to form controls on their own. */
+button,
+input,
+select,
+textarea {
+  word-spacing: inherit;
+}
+
 /* Header */
 .site-header {
   border-bottom: 1px solid var(--border);
@@ -107,6 +122,8 @@ main > p {
 
 .site-name::before {
   content: 'S';
+  /* The empty text after the slash stops screen readers announcing the letter. */
+  content: 'S' / '';
   display: grid;
   place-items: center;
   width: 30px;
@@ -299,7 +316,7 @@ tbody tr:hover td {
   align-items: baseline;
   gap: 14px 24px;
   margin: 0;
-  padding: 24px;
+  padding: 24px 20px;
 }
 
 .details dt {
@@ -348,15 +365,25 @@ textarea {
   background: var(--surface);
   color: var(--text);
   font: inherit;
-  transition: border-color 120ms ease, box-shadow 120ms ease;
+  transition: border-color 120ms ease;
+}
+
+/* One height for text fields, the date field and dropdowns. */
+input:not([type='checkbox']),
+select {
+  height: 44px;
+  padding-top: 0;
+  padding-bottom: 0;
+}
+
+select {
+  padding-left: 8px;
 }
 
 input:focus,
 select:focus,
 textarea:focus {
   border-color: var(--accent);
-  box-shadow: 0 0 0 3px var(--accent-soft);
-  outline: none;
 }
 
 .field input,
@@ -370,6 +397,10 @@ textarea:focus {
 .field:has(.field-error) select,
 .field:has(.field-error) textarea {
   border-color: var(--error);
+}
+
+.field:has(.field-error) :focus-visible {
+  outline-color: var(--error);
 }
 
 .field-error {
@@ -504,12 +535,18 @@ textarea:focus {
   display: inline-block;
   margin-top: 6px;
   color: var(--error);
+  text-decoration: underline;
+}
+
+.error-box a:hover {
+  color: #8f1c13;
 }
 
 /* Narrow screens */
 @media (max-width: 600px) {
   .container {
-    padding: 0 16px;
+    padding-left: 16px;
+    padding-right: 16px;
   }
 
   main.container {
@@ -521,9 +558,22 @@ textarea:focus {
     font-size: 23px;
   }
 
+  /* iPhones zoom into any field smaller than 16px when it's tapped. */
+  input,
+  select,
+  textarea {
+    font-size: 16px;
+  }
+
   th,
   td {
     padding: 12px 14px;
+    white-space: nowrap;
+  }
+
+  th:first-child,
+  td:first-child {
+    padding-left: 20px;
   }
 
   .details {
