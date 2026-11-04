@@ -32,7 +32,7 @@ export default function JobsTable({ path, emptyMessage }) {
               </td>
               <td>{job.customer.name}</td>
               <td>
-                {job.staff.name}
+                {job.staff.name} {!job.staff.is_active && <StatusBadge status="Inactive" />}
                 <div className="muted">{job.staff.role}</div>
               </td>
               <td>{job.description}</td>

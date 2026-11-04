@@ -23,15 +23,13 @@ def find_job(db: Session, job_id: int) -> Job:
     return job
 
 
-def has_clash(db: Session, staff_id: int, scheduled_at: datetime, job: Job | None = None) -> bool:
-    """Is this person on another open job at this exact time?"""
+def has_clash(db: Session, staff_id: int, scheduled_at: datetime) -> bool:
+    """Is this person on an open job at this exact time?"""
     query = select(Job.id).where(
         Job.staff_id == staff_id,
         Job.scheduled_at == scheduled_at,
         Job.status != "Completed",
     )
-    if job is not None:
-        query = query.where(Job.id != job.id)
     return db.scalar(query) is not None
 
 
@@ -56,9 +54,7 @@ def booking_errors(db: Session, details: JobDetails, job: Job | None = None) -> 
 
     if time_changed and details.scheduled_at < datetime.now():
         errors["scheduled_at"] = "Choose a date and time in the future."
-    elif (staff_changed or time_changed) and has_clash(
-        db, details.staff_id, details.scheduled_at, job
-    ):
+    elif (staff_changed or time_changed) and has_clash(db, details.staff_id, details.scheduled_at):
         errors["scheduled_at"] = CLASH_MESSAGE
 
     return errors
@@ -123,7 +119,7 @@ def update_job_status(job_id: int, update: JobStatusUpdate, db: Session = Depend
 
     # Reopening a completed job could put two open jobs in the same slot.
     reopening = job.status == "Completed" and update.status != "Completed"
-    if reopening and has_clash(db, job.staff_id, job.scheduled_at, job):
+    if reopening and has_clash(db, job.staff_id, job.scheduled_at):
         raise HTTPException(status_code=409, detail=CLASH_MESSAGE)
 
     job.status = update.status

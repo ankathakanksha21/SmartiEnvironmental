@@ -7,8 +7,8 @@ Give a fresh session this file and the code, and it can continue without anythin
 - **Step we're in:** 4 of 7, building. `jobs` is the last of four branches.
 - **On main:** the design, the running skeleton, customers with onboarding status, and the staff list.
 - **Working branch:** `jobs`.
-- **Open PR:** none yet.
-- **Next:** review `jobs`, raise its PR, and start `demo-and-docs` after the owner merges it.
+- **Open PR:** [#5](https://github.com/ankathakanksha21/SmartiEnvironmental/pull/5), `jobs`, waiting for the owner to merge it.
+- **Next:** after that merge, `demo-and-docs` starts from an up-to-date main.
 - **Deadline:** finish today, 4 November 2026.
 
 ### Plan
@@ -108,7 +108,7 @@ Everything in brief sections A to D gets built, with no extras. Main works after
 | Code layers | Routes plus service and repository layers, or routes that call the models | Routes call the models directly | Three tables don't need extra layers, and ORM calls are short. |
 | Frontend | Jinja2 pages from the server, or React | React with Vite, plain JavaScript, `react-router` for page URLs, one CSS file | The owner chose React. The split also shows clearly how the parts interact. The costs are that every developer needs Node.js, running it takes two terminals, and there's more frontend code. A minimal setup measured 24 npm packages and 62 MB. |
 | How the two talk | Allow cross-origin requests (CORS), or a Vite proxy | Vite proxy | Vite's dev server forwards `/api` calls to FastAPI, so the backend needs no CORS setup. |
-| Validation | Plain functions, or Pydantic models | Pydantic models with our own messages, plus checks in the route for rules that need the database | FastAPI runs the models before the route. A small handler turns failures into `{field: message}` for the forms. Our own messages replace Pydantic's wording for required text, phone and email. A bad status or a missing field keeps Pydantic's wording, because the forms can't send those. |
+| Validation | Plain functions, or Pydantic models | Pydantic models with our own messages, plus checks in the route for rules that need the database | FastAPI runs the models before the route. A small handler turns failures into `{field: message}` for the forms. Our own messages replace Pydantic's wording for required text, phone, email, blank dropdowns and dates. A bad status or a missing field keeps Pydantic's wording, because the forms can't send those. |
 | Where allowed statuses are enforced | `schemas.py` only, or a database CHECK constraint as well | `schemas.py` only | The API is the only way in, so a constraint would add another copy of each list. SQLite also can't change a constraint without rebuilding the table, so adding a status would mean deleting `crm.db`. |
 | Customer fields | Split or single address, required or optional email | Name, phone and address required, email optional, address in one box | Nothing in the brief needs city or postcode on their own. Staff need a phone number and an address to do a job, but some customers have no email. |
 | Date and time | Two columns, or one | One `scheduled_at` DateTime column | One value is simpler to sort and compare. A `datetime-local` input sends one value, Pydantic turns it into a Python datetime, and SQLAlchemy stores it. |
@@ -116,6 +116,8 @@ Everything in brief sections A to D gets built, with no extras. Main works after
 | Staff who leave | Delete, active flag, no removal | `is_active` flag | They drop off the booking list, and past jobs keep their name. |
 | Status changes | Inside the edit form, or their own small form | Their own form on the record's page | It's the most frequent action, and it shouldn't re-run the date rules. |
 | Booking rules | None, or basic checks | No booking in the past, and no two open jobs for one staff member at the same date and time | These are the two mistakes a booking form should catch. With no job durations, only exact matches count as a clash. |
+| Missed visits | Let them vanish from Upcoming, or label them | An Overdue label under All jobs | Upcoming only shows future jobs, so a visit that was missed would otherwise look fine. The owner approved this in the design. |
+| Where to book from | The jobs page only, or customer pages too | Both | The brief says to create an appointment for a customer, so a customer's page has **Book a job**, with that customer selected. The owner approved this in the design. |
 | Where this file lives | Committed, or local only | Committed to the repo root | It's backed up, and a fresh session gets it with one clone. It holds no prompts. |
 | AI attribution lines | Keep, or remove | Removed | The owner's choice. |
 | AI mention in the README | One line, or none | None | The owner's choice. |
@@ -201,7 +203,7 @@ A page calls `api.js`, which calls a FastAPI route. FastAPI validates the reques
 
 | API call | What it does |
 |---|---|
-| `GET /api/jobs` | List all, soonest first |
+| `GET /api/jobs` | List all, earliest first |
 | `GET /api/jobs?upcoming=true` | Upcoming appointments: future jobs not completed |
 | `GET /api/jobs?customer_id=1` or `?staff_id=1` | One customer's or one staff member's jobs |
 | `POST /api/jobs` | Book. A new job is always Pending |
@@ -209,11 +211,11 @@ A page calls `api.js`, which calls a FastAPI route. FastAPI validates the reques
 | `PUT /api/jobs/{id}` | Edit customer, staff member, date and time, description |
 | `PATCH /api/jobs/{id}/status` | Change status |
 
-**Booking rules, in `booking_errors` in `routes/jobs.py`.** These live in the route because they need the database or the job being edited.
+**Booking rules, in `routes/jobs.py`.** These live in the routes because they need the database or the job being edited. `booking_errors` checks the first four, and `update_job_status` checks the last.
 - The customer and staff member must exist.
 - A staff member must be active, unless the job already has them.
 - The time must be in the future, unless an edit leaves it unchanged.
-- One staff member can't have two open jobs at the same date and time. Jobs have no duration, so only exact matches count, and `to_the_minute` in `schemas.py` drops seconds so that 09:30:00 and 09:30:59 match.
+- One staff member can't have two open jobs at the same date and time. Jobs have no duration, so only exact matches count, and `booking_time` in `schemas.py` drops seconds so that 09:30:00 and 09:30:59 match. An edit only runs this check if it changes the staff member or time, which also stops a job clashing with itself.
 - Reopening a completed job returns 409 if its slot has since been taken.
 
 **Other job details**
@@ -236,6 +238,13 @@ A page calls `api.js`, which calls a FastAPI route. FastAPI validates the reques
 **The design comparison stalled.** The planned comparison had three stages: prototypes, three independent designs, then critics. The prototype step stopped making progress at 17:08, and Claude didn't notice until the owner asked for status at 18:25. The cause is unknown. Claude stopped the run, used the evidence already on disk, and wrote the design directly. The independent designs and critics never ran, so each PR gets a review instead. This cost about 75 minutes.
 
 **The API stopped working in the browser after a branch switch.** Pages said "Something went wrong" and `/api/customers` through Vite returned HTML, although the backend answered correctly on its own. Vite's log showed `git checkout` had rewritten `vite.config.js`, and the automatic restart that followed lost the proxy. Restarting `npm run dev` fixed it, and the README now says so.
+
+**Problems the `jobs` review found**
+- Dead code: `has_clash` took the job being edited and excluded it, but neither caller could ever reach that case. Breaking it failed no test. We removed it.
+- Typing a date straight through in Chrome, with no Tab, sends a six-digit year such as `202609-11-05T03:00`, and the form showed Pydantic's raw wording. `booking_time` now reads the date itself and says "Enter a valid date and time."
+- Weak tests: nothing proved that an In Progress job blocks its slot, or that the reopen check works for In Progress. We added both.
+- A job held by an inactive staff member looked normal in the job lists, and customers with the same name looked identical in the dropdown. `JobsTable` now shows an Inactive badge, and the dropdown shows each customer's phone.
+- With no customers or staff, the booking form gave no way forward. It now links to the add pages.
 
 **Problems the `staff` review found**
 - An API edit that left out `is_active` turned an inactive person active and returned 200. The add form's default also applied to edits. `StaffCreate` now holds the add fields, and `StaffDetails` requires the flag, so that edit now returns 422.
@@ -267,7 +276,7 @@ A page calls `api.js`, which calls a FastAPI route. FastAPI validates the reques
 **How to test:** follow [README.md](README.md). Run `pytest` in `backend`, and `npm run lint` and `npm run build` in `frontend`.
 
 **Latest results, on `jobs`**
-- `pytest`: 106 passed on Python 3.11.
+- `pytest`: 112 passed on Python 3.11.
 - `npm run lint` is clean, and `npm run build` succeeds.
 - The frontend has no automated tests. Its pages get checked in the browser.
 
@@ -280,6 +289,7 @@ A page calls `api.js`, which calls a FastAPI route. FastAPI validates the reques
 - Customer and staff pages listed their jobs, and **Book a job** from a customer page started with that customer selected.
 - A past Pending job showed Overdue. Its description could be corrected without changing its time or its inactive staff member, but moving it to another past time was refused.
 - `/jobs/999` showed "Job not found."
+- After the review fixes, a date with a six-digit year showed "Enter a valid date and time." The dropdown showed each customer's phone, Upcoming showed an Inactive badge, and an empty database showed links to add a customer and a staff member.
 
 **Browser check of the staff pages**, run the same way
 - A blank form showed errors for name and phone, and a bad phone kept the typed name.
@@ -336,7 +346,7 @@ The owner chose an ORM and asked how the folders and code were planned. Claude p
 
 **Step 4, `staff`.** Claude built the staff API, tests and pages, following the customer pattern, and checked each flow in the browser. Two independent reviewers found that an API edit could reactivate someone by accident, and Claude fixed it. While the review ran, the owner asked for the workflow as a flow chart, and Claude drew three: how a save moves through the app, how office staff use the CRM, and how each feature gets built. The owner merged the PR.
 
-**Step 4, `jobs`.** Claude built the job API, the booking rules and 49 more tests, then the job pages, and added job lists to the customer and staff pages. Each flow got checked in the browser.
+**Step 4, `jobs`.** Claude built the job API, the booking rules and tests, then the job pages, and added job lists to the customer and staff pages. Each flow got checked in the browser. Three independent reviewers found dead code, a raw date error and some weak tests, and Claude fixed them (section 7). While the review ran, the owner asked who the end users are, and how long is left. Claude said office staff are the users, that fitters and engineers would be the natural next users if login existed, and that about an hour remained.
 
 ## 10. How to continue
 
@@ -361,4 +371,7 @@ The owner chose an ORM and asked how the folders and code were planned. Claude p
 - `.claude/launch.json` holds Claude's commands for starting the servers. It stays out of git through `.git/info/exclude`.
 - When the Browser pane in the Claude desktop app is hidden, screenshots fail but reading page text works.
 - The owner has no automated checks on GitHub, so a PR shows no CI results. Tests run locally.
-- Known limitation for the final README: name sorting ignores case for English letters only, because SQLite's `lower()` handles ASCII alone. Accented names sort after Z.
+- Known limitations for the final README:
+  - Name sorting ignores case for English letters only, because SQLite's `lower()` handles ASCII alone. Accented names sort after Z.
+  - Two simultaneous requests can both pass the double-booking check, because it runs before the save and the database doesn't enforce it. A reviewer double-booked 4 of 10 slots this way. A partial unique index on `(staff_id, scheduled_at)` would fix it, which is more than one office needs.
+  - A completed job can't be moved onto a time when the staff member has an open job, although that wouldn't create two open jobs. It's rare and harms no data.

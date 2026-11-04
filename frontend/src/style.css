@@ -278,6 +278,11 @@ textarea {
   font-size: 14px;
 }
 
+.form-hint {
+  margin: -8px 0 16px;
+  font-size: 14px;
+}
+
 .checkbox {
   display: flex;
   align-items: center;

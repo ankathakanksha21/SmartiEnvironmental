@@ -28,11 +28,16 @@ export default function JobForm({ initialValues, save, saveLabel, cancelTo }) {
           <option value="">Choose a customer</option>
           {customers.data.map((customer) => (
             <option key={customer.id} value={customer.id}>
-              {customer.name}
+              {customer.name} ({customer.phone})
             </option>
           ))}
         </select>
       </Field>
+      {customers.data.length === 0 && (
+        <p className="form-hint">
+          No customers yet. <Link to="/customers/new">Add a customer first.</Link>
+        </p>
+      )}
 
       <Field label="Staff member" error={form.errors.staff_id}>
         <select name="staff_id" value={form.values.staff_id} onChange={form.change}>
@@ -44,6 +49,11 @@ export default function JobForm({ initialValues, save, saveLabel, cancelTo }) {
           ))}
         </select>
       </Field>
+      {staffOptions.length === 0 && (
+        <p className="form-hint">
+          No active staff yet. <Link to="/staff/new">Add a staff member first.</Link>
+        </p>
+      )}
 
       <Field label="Date and time" error={form.errors.scheduled_at}>
         <input

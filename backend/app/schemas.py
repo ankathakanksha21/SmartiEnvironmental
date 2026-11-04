@@ -8,14 +8,7 @@ import re
 from datetime import datetime
 from typing import Annotated, Literal
 
-from pydantic import (
-    AfterValidator,
-    BaseModel,
-    BeforeValidator,
-    ConfigDict,
-    NaiveDatetime,
-    ValidationInfo,
-)
+from pydantic import AfterValidator, BaseModel, BeforeValidator, ConfigDict, ValidationInfo
 
 OnboardingStatus = Literal["New Enquiry", "In Progress", "Active"]
 StaffRole = Literal["Fitter", "Maintenance Engineer"]
@@ -53,24 +46,26 @@ def chosen_from_list(value, info: ValidationInfo):
     return value
 
 
-def date_and_time_given(value):
+def booking_time(value) -> datetime:
+    """Read the date input's text, with our own messages for anything unreadable."""
     if value == "":
         raise ValueError("Date and time is required.")
-    return value
-
-
-def to_the_minute(value: datetime) -> datetime:
-    """Drop the seconds, so two bookings for 09:30 count as the same time."""
-    return value.replace(second=0, microsecond=0)
+    try:
+        parsed = datetime.fromisoformat(value)
+    except (TypeError, ValueError):
+        raise ValueError("Enter a valid date and time.") from None
+    # Times are local with no offset. An offset would crash the comparison with datetime.now().
+    if parsed.tzinfo is not None:
+        raise ValueError("Enter a valid date and time.")
+    # Drop the seconds, so two bookings for 09:30 count as the same time.
+    return parsed.replace(second=0, microsecond=0)
 
 
 RequiredText = Annotated[str, AfterValidator(required)]
 Phone = Annotated[str, AfterValidator(valid_phone)]
 OptionalEmail = Annotated[str, AfterValidator(valid_email_or_blank)]
 ChosenId = Annotated[int, BeforeValidator(chosen_from_list)]
-BookingTime = Annotated[
-    NaiveDatetime, BeforeValidator(date_and_time_given), AfterValidator(to_the_minute)
-]
+BookingTime = Annotated[datetime, BeforeValidator(booking_time)]
 
 
 class RequestBody(BaseModel):

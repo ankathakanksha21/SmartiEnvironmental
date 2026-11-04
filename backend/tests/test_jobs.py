@@ -100,11 +100,22 @@ def test_booking_rejects_invalid_input_and_saves_nothing(client, booking, field,
     assert client.get("/api/jobs").json() == []
 
 
-@pytest.mark.parametrize("value", ["not a date", "2026-13-40T09:30", "2030-01-01T09:30:00+01:00"])
-def test_booking_rejects_a_bad_date(client, booking, value):
+@pytest.mark.parametrize(
+    "value",
+    [
+        "not a date",
+        "2026-13-40T09:30",
+        "2030-01-01T09:30:00+01:00",
+        # What Chrome sends if you type the date straight through without moving on.
+        "202609-11-05T03:00",
+        12345,
+        None,
+    ],
+)
+def test_booking_rejects_a_bad_date_with_a_plain_message(client, booking, value):
     response = client.post("/api/jobs", json={**booking, "scheduled_at": value})
 
-    assert "scheduled_at" in field_errors(response)
+    assert field_errors(response) == {"scheduled_at": "Enter a valid date and time."}
 
 
 def test_booking_rejects_a_time_in_the_past(client, booking):
@@ -121,7 +132,7 @@ def test_booking_rejects_inactive_staff(client, booking):
     assert field_errors(response) == {"staff_id": "Lee Hall is inactive, so can't take new jobs."}
 
 
-def test_booking_reports_every_problem_at_once(client, booking):
+def test_booking_reports_every_problem_at_once(client):
     response = client.post(
         "/api/jobs", json={"customer_id": "", "staff_id": "", "description": "", "scheduled_at": ""}
     )
@@ -129,7 +140,7 @@ def test_booking_reports_every_problem_at_once(client, booking):
     assert set(field_errors(response)) == {"customer_id", "staff_id", "description", "scheduled_at"}
 
 
-def test_database_refuses_a_job_for_a_customer_that_does_not_exist(client, booking):
+def test_database_refuses_a_job_for_a_customer_that_does_not_exist(booking):
     # This test doesn't call the API. It proves SQLite is enforcing foreign keys.
     with Session(database.engine) as session:
         session.add(
@@ -148,8 +159,12 @@ def test_database_refuses_a_job_for_a_customer_that_does_not_exist(client, booki
 # Double booking
 
 
-def test_booking_rejects_a_second_open_job_for_one_person_at_the_same_time(client, booking):
-    book_job(client, booking)
+@pytest.mark.parametrize("first_job_status", ["Pending", "In Progress"])
+def test_booking_rejects_a_second_open_job_for_one_person_at_the_same_time(
+    client, booking, first_job_status
+):
+    first = book_job(client, booking)
+    client.patch(f"/api/jobs/{first['id']}/status", json={"status": first_job_status})
 
     response = client.post("/api/jobs", json=booking)
 
@@ -158,11 +173,12 @@ def test_booking_rejects_a_second_open_job_for_one_person_at_the_same_time(clien
     }
 
 
-def test_seconds_do_not_get_around_the_double_booking_rule(client, booking):
+@pytest.mark.parametrize("extra", [":59", ":00.5"])
+def test_seconds_do_not_get_around_the_double_booking_rule(client, booking, extra):
     book_job(client, booking)
 
     response = client.post(
-        "/api/jobs", json={**booking, "scheduled_at": booking["scheduled_at"] + ":59"}
+        "/api/jobs", json={**booking, "scheduled_at": booking["scheduled_at"] + extra}
     )
 
     assert "scheduled_at" in field_errors(response)
@@ -187,12 +203,13 @@ def test_a_completed_job_does_not_block_its_time(client, booking):
     book_job(client, booking)
 
 
-def test_reopening_a_completed_job_is_refused_if_its_time_is_taken(client, booking):
+@pytest.mark.parametrize("new_status", ["Pending", "In Progress"])
+def test_reopening_a_completed_job_is_refused_if_its_time_is_taken(client, booking, new_status):
     first = book_job(client, booking)
     client.patch(f"/api/jobs/{first['id']}/status", json={"status": "Completed"})
     book_job(client, booking)
 
-    response = client.patch(f"/api/jobs/{first['id']}/status", json={"status": "Pending"})
+    response = client.patch(f"/api/jobs/{first['id']}/status", json={"status": new_status})
 
     assert response.status_code == 409
     assert response.json() == {"detail": "This staff member already has an open job at that time."}
@@ -206,6 +223,7 @@ def test_reopening_a_completed_job_is_allowed_if_its_time_is_free(client, bookin
     response = client.patch(f"/api/jobs/{job['id']}/status", json={"status": "In Progress"})
 
     assert response.status_code == 200
+    assert client.get(f"/api/jobs/{job['id']}").json()["status"] == "In Progress"
 
 
 # Listing and upcoming appointments
