@@ -58,7 +58,7 @@ npm run dev
 
 Open http://localhost:5173. You should see the Customers page.
 
-If you switch git branches while `npm run dev` is running, stop it and start it again. A branch switch can make Vite restart itself and lose its link to the backend.
+If you pull new code or switch git branches while `npm run dev` is running, stop it, run `npm install` and start it again. A branch switch can make Vite restart itself and lose its link to the backend, and Vite can't find a package installed while it's running.
 
 ### 3. Add the sample data
 

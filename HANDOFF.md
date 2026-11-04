@@ -4,10 +4,10 @@ Give a fresh session this file and the code, and it can continue without anythin
 
 ## 1. Current status
 
-- **Step we're in:** finished. All 7 steps are done.
+- **Step we're in:** the 7 planned steps are done. The owner then asked for a design-only change, which is on the `ui-design` branch.
 - **On main:** all of brief sections A to D, the sample data and the final README.
-- **Open PR:** none.
-- **Next:** the owner tries the app, gives the assessor access to the private repo, and presents the work. New work starts only if the owner asks.
+- **Open PR:** [#8](https://github.com/ankathakanksha21/SmartiEnvironmental/pull/8), `ui-design`, waiting for the owner to merge it.
+- **Next:** after that merge, run `npm install` in `frontend` and restart `npm run dev`, because the change adds a font package. New work starts only if the owner asks.
 
 ### Plan
 
@@ -122,6 +122,11 @@ Everything in brief sections A to D got built. The one small extra is the Overdu
 | Booking rules | None, or basic checks | No booking in the past, and no two open jobs for one staff member at the same date and time | These are the two mistakes a booking form should catch. With no job durations, only exact matches count as a clash. |
 | Missed visits | Let them vanish from Upcoming, or label them | An Overdue label under All jobs | Upcoming only shows future jobs, so a missed visit would otherwise look fine. The owner approved this in the design. |
 | Where to book from | The jobs page only, or customer pages too | Both | The brief says to create an appointment for a customer, so a customer's page has **Book a job**. The owner approved this in the design. |
+| Look and feel | Keep the first version, or follow Smarti's brand | Smarti's brand, read from smartilimited.com: navy `#253551`, sky blue `#509EC7`, green `#5BB906`, square navy buttons, and a hand-drawn green stroke under page titles and the active menu item. Cards stay, as the owner asked. | The owner asked for a design refresh with no change in behaviour, and gave the website as the reference. Only `style.css`, the favicon, the font imports in `main.jsx` and the font package in `package.json` and its lock file changed. The stroke is our own SVG, not copied from the site. |
+| Where the green goes | Every link, or only key places | The green stroke marks page titles, the active menu item and the active tab. Other links have a thin sky-blue underline that turns green on hover. | Smarti's site uses green as a rare accent on headings. On every link it lost its effect and blurred what was clickable. |
+| Small blue text | Smarti's sky blue, or a darker shade | `#2b73a0` for table headers, labels and the focus outline | Smarti's `#509EC7` is about 3:1 on white, too low for small text. It stays for the top strip, link underlines and focus on the navy header. |
+| Corners | Rounded, or square like Smarti's site | Buttons and fields square, cards and badges only 3 to 4px | The owner asked for cards, and a small radius keeps them looking like cards while staying close to the brand. |
+| Font | System fonts, a Google Fonts link, or a package | Poppins, Smarti's font, through `@fontsource/poppins` | The package works offline and needs no extra setup step beyond `npm install`. A Google Fonts link would need internet to look right. |
 | Where this file lives | Committed, or local only | Committed to the repo root | It's backed up, and a fresh session gets it with one clone. It holds no prompts. |
 | AI attribution lines | Keep, or remove | Removed | The owner's choice. |
 | AI mention in the README | One line, or none | None | The owner's choice. |
@@ -221,6 +226,12 @@ Pages: `StaffList`, `StaffDetail`, `StaffNew`, `StaffEdit`. The last two share `
 
 **The API stopped working in the browser after a branch switch.** Pages said "Something went wrong" and `/api/customers` through Vite returned HTML, although the backend answered correctly on its own. Vite's log showed `git checkout` had rewritten `vite.config.js`, and the automatic restart that followed lost the proxy. Restarting `npm run dev` fixed it, and the README says so.
 
+**The first redesign missed the brand.** The owner's design request said "green underlining". No images reached Claude with that message, and Claude read it as something to remove, then built a look of its own with PR #8. The owner then shared screenshots of smartilimited.com, where the green hand-drawn underline is the brand's signature. Claude read the real fonts and colours from the live site and redid the design on the same branch. Lesson for later sessions: ask for the reference before designing, and check what a word refers to before acting on it.
+
+**The design review on `ui-design`.** A visual reviewer found that the phone header had lost its padding, and that phone numbers wrapped in phone-sized tables. An accessibility reviewer found that removing the focus outline left the checkbox and error fields with almost no visible focus, and that fields under 16px make iPhones zoom in when tapped. Claude fixed all of these before redoing the design, and kept the fixes.
+
+**The brand review on `ui-design`.** A reviewer measured the green stroke against the owner's images: it sat three times too far below the text and was too thin, where Smarti's crosses the descenders like a brush mark. It also found green on every link, where the site uses it sparingly. An accessibility reviewer found the sky-blue focus outline under 3:1 on light backgrounds, field borders at 1.72:1, and long job descriptions pushing Status far off-screen on phones. Claude fixed all of these. All normal text passes 4.5:1, and the disabled button (exempt) is 3.36:1. The green stroke itself is about 2.5:1 on white, which is fine as decoration because it carries no meaning of its own.
+
 **What each review found, and Claude fixed**
 
 | Branch | Finding | Fix |
@@ -263,6 +274,8 @@ The first commit message on `staff` says unticking Active takes someone off the 
 - `git status` stayed clean afterwards, so nothing the app or tests create gets committed.
 - In the final review, an auditor walked every line of the brief and found all of it met, with no code bug. A second reviewer followed the README as a new developer, and every step worked.
 - The frontend has no automated tests. Its pages get checked in the browser.
+
+**Results on `ui-design`:** `pytest` 114 passed, `npm run lint` clean, `npm run build` succeeds. A throwaway Playwright script in a scratch folder walked the whole app with real clicks and key presses on a scratch copy of the app, and all its checks passed. Screenshots of 11 pages or states at 1280px and 390px wide showed no sideways scrolling and no console errors.
 
 **Demo script**
 
@@ -330,6 +343,10 @@ The owner chose an ORM and asked how the folders and code were planned. Claude p
 
 **Step 5, `demo-and-docs`.** Claude added the sample data and final README, took screenshots to check how the pages look, tested from a fresh clone on both Python versions, and ran the full demo against the brief. Three reviewers then acted as a new developer, a brief auditor and an editor. They found every brief line met and no code bug, plus documentation fixes, which Claude made before raising the last PR. Claude pointed out that this file names Claude and is visible to anyone with repo access. The owner merged the PR, and Claude confirmed that main passes every check.
 
+**After the plan, `ui-design`.** The owner tried the app, asked how to test it by hand, and added their own test customer. They then asked for a design refresh with the same functionality: colours, font, sizes, spacing, cards instead of boxes, and green underlining, which Claude misread as something to remove. Claude restyled the app on the `ui-design` branch, using a scratch copy for any test that writes data, so the owner's data stayed untouched. Two independent reviewers checked the look, accessibility and behaviour, and Claude fixed what they found (section 7), then raised the PR.
+
+The owner then shared two screenshots of smartilimited.com and asked whether Claude had considered them. Claude said it hadn't: no images had come through, and it had also misread "green underlining" as something to remove. The owner's business is now clear from that site: Smarti Environmental makes waterless urinal valves, and its customers get installation and maintenance. Claude read the brand's fonts and colours from the live site and redid the design to match.
+
 ## 10. How to continue
 
 1. Read section 1, then section 3.
@@ -355,6 +372,8 @@ The owner chose an ORM and asked how the folders and code were planned. Claude p
 - `.claude/launch.json` holds Claude's commands for starting the servers. It stays out of git through `.git/info/exclude`.
 - When the Browser pane in the Claude desktop app is hidden, screenshots fail but reading page text works. Headless Chrome can take screenshots instead.
 - Stopping a server that was started through a Git Bash wrapper left its Vite process running. Check ports 8000 and 5173 before trusting what answers there.
+- A running Vite server can't find a package installed after it started, and the page goes blank with a 500 error. Restart `npm run dev` after `npm install`.
+- `playwright-core` with the installed Chrome (`channel: 'chrome'`) gives real clicks and screenshots even when the Browser pane is hidden. Keep it in a scratch folder, because the project doesn't need it.
 - The repo has no automated checks on GitHub, so a PR shows no CI results. Tests run locally.
 - Known limitations are in the README. In testing, simultaneous requests double-booked 4 of 10 slots in one run and 8 of 10 in another.
 - The README is written in the owner's voice and leaves out AI by the owner's choice, while this file records how the work was done.
