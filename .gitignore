@@ -1,17 +1,11 @@
 # Python
 .venv/
 __pycache__/
-*.pyc
 .pytest_cache/
 
 # Node
 node_modules/
 dist/
 
-# Local database files
+# Local database
 *.db
-*.sqlite
-*.sqlite3
-
-# Local settings
-.env

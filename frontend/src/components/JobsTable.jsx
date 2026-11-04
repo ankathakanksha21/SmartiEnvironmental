@@ -27,7 +27,7 @@ export default function JobsTable({ path, emptyMessage }) {
         <tbody>
           {jobs.map((job) => (
             <tr key={job.id}>
-              <td>
+              <td className="no-wrap">
                 <Link to={`/jobs/${job.id}`}>{formatDateTime(job.scheduled_at)}</Link>
               </td>
               <td>{job.customer.name}</td>
