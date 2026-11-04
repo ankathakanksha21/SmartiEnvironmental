@@ -4,11 +4,10 @@ Give a fresh session this file and the code, and it can continue without anythin
 
 ## 1. Current status
 
-- **Step we're in:** Step 9, `connected-workflow`, waiting for the owner to merge.
-- **On main:** All of brief sections A to D, the sample data, the final README and the Smarti-branded design.
-- **On this branch:** Six small additions that connect the steps into one journey (section 4).
-- **Open PR:** #10, on `connected-workflow`.
-- **Next:** The owner merges the PR. Claude then checks main and corrects this status in a small follow-up PR, as with PR #7 and PR #9. After that, the owner tries the app, gives the assessor access to the private repo, and presents the work. New work starts only if the owner asks.
+- **Step we're in:** Finished. All 9 steps below are done.
+- **On main:** All of brief sections A to D, the sample data, the final README, the Smarti-branded design and the six additions that connect the steps into one journey (section 4).
+- **Open PR:** None.
+- **Next:** The owner tries the app, gives the assessor access to the private repo, and presents the work. New work starts only if the owner asks.
 
 ### Plan
 
@@ -20,7 +19,7 @@ Give a fresh session this file and the code, and it can continue without anythin
 - [x] 6. Finish the README and this file, on the same branch
 - [x] 7. Owner merges the last PR
 - [x] 8. Design refresh the owner asked for, on `ui-design`
-- [ ] 9. Connect the steps into one workflow, on `connected-workflow`, after the owner's cross-check
+- [x] 9. Connect the steps into one workflow, on `connected-workflow`, after the owner's cross-check
 
 ## 2. Project summary and checklist
 
@@ -418,7 +417,7 @@ The owner then shared two screenshots of smartilimited.com and asked whether Cla
 
 The owner also asked whether the app should be designed around what each kind of user wants, whether it confirms every important action, and whether it avoids duplicates and stale job details. Claude said the brief lists features rather than users, so the design matches it, with an office admin fully covered and a manager, fitter or engineer partly covered. Errors were shown but successes weren't. Duplicate customers weren't prevented, and job details stay current because each visit is one record read live.
 
-Claude suggested six additions and offered a duplicate check as a seventh. The owner chose the six. Claude built them on one branch and tested them with real clicks on a scratch copy, so the owner's data stayed untouched. Independent reviewers then checked the branch (section 7).
+Claude suggested six additions and offered a duplicate check as a seventh. The owner chose the six. Claude built them on one branch and tested them with real clicks on a scratch copy, so the owner's data stayed untouched. Independent reviewers then checked the branch (section 7). The owner merged the PR, and Claude confirmed that main passes `pytest`, lint and the build.
 
 ## 10. How to continue
 
