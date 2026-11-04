@@ -13,7 +13,7 @@ export default function StaffEdit() {
 
   async function save(values) {
     await request(`/staff/${id}`, { method: 'PUT', body: values })
-    navigate(`/staff/${id}`)
+    navigate(`/staff/${id}`, { state: { message: 'Staff details saved.' } })
   }
 
   const { name, role, phone, is_active } = member

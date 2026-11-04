@@ -60,6 +60,12 @@ def booking_errors(db: Session, details: JobDetails, job: Job | None = None) -> 
     return errors
 
 
+def start_onboarding(customer: Customer) -> None:
+    """A booked job takes a customer out of New Enquiry."""
+    if customer.onboarding_status == "New Enquiry":
+        customer.onboarding_status = "In Progress"
+
+
 @router.get("", response_model=list[JobOut])
 def list_jobs(
     upcoming: bool = False,
@@ -90,6 +96,7 @@ def create_job(details: JobDetails, db: Session = Depends(get_db)):
 
     job = Job(**details.model_dump(), status="Pending")
     db.add(job)
+    start_onboarding(db.get(Customer, details.customer_id))
     db.commit()
     return job
 
@@ -109,6 +116,7 @@ def update_job(job_id: int, details: JobDetails, db: Session = Depends(get_db)):
 
     for field, value in details.model_dump().items():
         setattr(job, field, value)
+    start_onboarding(db.get(Customer, details.customer_id))
     db.commit()
     return job
 
@@ -123,5 +131,8 @@ def update_job_status(job_id: int, update: JobStatusUpdate, db: Session = Depend
         raise HTTPException(status_code=409, detail=CLASH_MESSAGE)
 
     job.status = update.status
+    # A finished job means the customer's onboarding is over.
+    if update.status == "Completed":
+        job.customer.onboarding_status = "Active"
     db.commit()
     return job

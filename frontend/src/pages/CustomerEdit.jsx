@@ -13,7 +13,7 @@ export default function CustomerEdit() {
 
   async function save(values) {
     await request(`/customers/${id}`, { method: 'PUT', body: values })
-    navigate(`/customers/${id}`)
+    navigate(`/customers/${id}`, { state: { message: 'Customer details saved.' } })
   }
 
   const { name, phone, email, address } = customer

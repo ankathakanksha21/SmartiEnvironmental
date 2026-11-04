@@ -10,7 +10,7 @@ export default function StaffNew() {
 
   async function save(values) {
     const member = await request('/staff', { method: 'POST', body: values })
-    navigate(`/staff/${member.id}`)
+    navigate(`/staff/${member.id}`, { state: { message: 'Staff member added.' } })
   }
 
   return (

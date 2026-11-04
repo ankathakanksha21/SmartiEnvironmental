@@ -170,6 +170,61 @@ main > p {
   margin: 0;
 }
 
+/* Overview counts */
+.stat-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 16px;
+}
+
+.stat-card {
+  display: block;
+  padding: 20px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: var(--surface);
+  box-shadow: var(--shadow-card);
+  text-decoration: none;
+  transition: border-color 120ms ease;
+}
+
+.stat-card:hover {
+  border-color: var(--sky);
+  color: var(--navy);
+}
+
+.stat-value {
+  display: block;
+  font-size: 36px;
+  font-weight: 500;
+  line-height: 1.2;
+}
+
+.stat-label {
+  color: var(--sky-text);
+  font-size: 14px;
+  font-weight: 700;
+}
+
+/* What to do next on a customer or job page */
+.next-step {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 14px;
+  margin-bottom: 20px;
+  padding: 14px 20px;
+  border-left: 4px solid var(--green);
+  background: var(--surface);
+  box-shadow: var(--shadow-card);
+}
+
+.next-step-label {
+  color: var(--sky-text);
+  font-size: 14px;
+  font-weight: 700;
+}
+
 /* Upcoming and All jobs links */
 .view-tabs {
   display: flex;
@@ -477,6 +532,17 @@ textarea:focus {
 }
 
 /* Messages */
+.success-box {
+  margin-bottom: 20px;
+  padding: 14px 18px;
+  border: 1px solid #c5e39c;
+  border-radius: 4px;
+  background: #ebf6de;
+  color: #33690a;
+  font-size: 14px;
+  font-weight: 500;
+}
+
 .error-box {
   margin-bottom: 20px;
   padding: 14px 18px;

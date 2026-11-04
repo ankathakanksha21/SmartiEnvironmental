@@ -15,7 +15,7 @@ export default function CustomerNew() {
 
   async function save(values) {
     const customer = await request('/customers', { method: 'POST', body: values })
-    navigate(`/customers/${customer.id}`)
+    navigate(`/customers/${customer.id}`, { state: { message: 'Customer added.' } })
   }
 
   return (

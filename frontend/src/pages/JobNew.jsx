@@ -10,7 +10,7 @@ export default function JobNew() {
 
   async function save(values) {
     const job = await request('/jobs', { method: 'POST', body: values })
-    navigate(`/jobs/${job.id}`)
+    navigate(`/jobs/${job.id}`, { state: { message: 'Job booked.' } })
   }
 
   return (
@@ -21,7 +21,8 @@ export default function JobNew() {
           customer_id: customerId ?? '',
           staff_id: '',
           scheduled_at: '',
-          description: '',
+          // A follow-up link can suggest a description, such as "Maintenance visit".
+          description: searchParams.get('description') ?? '',
         }}
         save={save}
         saveLabel="Book job"

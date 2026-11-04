@@ -4,8 +4,8 @@ import { formatDateTime } from '../formatDateTime.js'
 import ErrorMessage from './ErrorMessage.jsx'
 import StatusBadge from './StatusBadge.jsx'
 
-// Loads and lists jobs. The jobs page, customer pages and staff pages each pass their own path.
-export default function JobsTable({ path, emptyMessage }) {
+// Loads and lists jobs. Each page that uses it passes its own path, and can cap the number of rows.
+export default function JobsTable({ path, emptyMessage, limit }) {
   const { data: jobs, error, loading } = useApi(path)
 
   if (loading) return <p>Loading...</p>
@@ -25,14 +25,17 @@ export default function JobsTable({ path, emptyMessage }) {
           </tr>
         </thead>
         <tbody>
-          {jobs.map((job) => (
+          {jobs.slice(0, limit).map((job) => (
             <tr key={job.id}>
               <td className="no-wrap">
                 <Link to={`/jobs/${job.id}`}>{formatDateTime(job.scheduled_at)}</Link>
               </td>
-              <td>{job.customer.name}</td>
               <td>
-                {job.staff.name} {!job.staff.is_active && <StatusBadge status="Inactive" />}
+                <Link to={`/customers/${job.customer.id}`}>{job.customer.name}</Link>
+              </td>
+              <td>
+                <Link to={`/staff/${job.staff.id}`}>{job.staff.name}</Link>{' '}
+                {!job.staff.is_active && <StatusBadge status="Inactive" />}
                 <div className="muted">{job.staff.role}</div>
               </td>
               <td>{job.description}</td>

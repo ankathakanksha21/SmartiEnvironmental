@@ -13,7 +13,7 @@ export default function JobEdit() {
 
   async function save(values) {
     await request(`/jobs/${id}`, { method: 'PUT', body: values })
-    navigate(`/jobs/${id}`)
+    navigate(`/jobs/${id}`, { state: { message: 'Job saved.' } })
   }
 
   return (
