@@ -287,7 +287,7 @@ Pages: `StaffList`, `StaffDetail`, `StaffNew`, `StaffEdit`. The last two share `
 | `demo-and-docs` | The README never said to clone the repo or reload after seeding, and left out the Overdue label | Added |
 | `demo-and-docs` | "By hand" overstated the page checks, which used scripted clicks | Reworded |
 | `connected-workflow` | Saving any job edit re-ran the onboarding rule and overwrote a status set by hand. Two reviewers found this separately, and no test covered it | The rule only runs when a job moves to another customer. Added tests |
-| `connected-workflow` | The success message lived in browser history, so a reload or Back showed it again. A slow save could pull you back to the page you'd left, and the timer that cleared it could cancel a link click | Moved it into React state in `Layout` |
+| `connected-workflow` | The success message lived in browser history, so a reload or Back showed it again. A slow status save could pull you back to the page you'd left, and the timer that cleared the message could cancel a link click | Moved it into React state in `Layout` |
 | `connected-workflow` | On a phone, the message from a status save appeared off-screen. On desktop, the page jumped about 72px when it cleared | Fixed it to the bottom of the screen |
 | `connected-workflow` | A completed job's page offered a follow-up even when one was already booked, which contradicted the customer's page | Both pages now share `CustomerNextStep` |
 | `connected-workflow` | The onboarding badge on the job page read as the job's own status | A labelled line under the customer's name |
@@ -299,7 +299,7 @@ Pages: `StaffList`, `StaffDetail`, `StaffNew`, `StaffEdit`. The last two share `
 
 **How far the `connected-workflow` review went.** Three reviewers checked the branch, and a second reviewer for each tried to disprove the findings. The one for the visual findings finished, confirming nine of the 17 and refuting eight. The other two hadn't finished after about 30 minutes, so Claude stopped them to meet the deadline. Their main findings are fixed, and each fix has a test or a scripted click check.
 
-**Findings left alone on purpose, on `connected-workflow`.** Count labels stay plural beside a 1, because they name the metric. A customer's name in the jobs table on their own page still links there, which does no harm. The Next step line appears 40 to 70ms after the customer's details. Within 5 seconds of a successful save, a refused status change shows the green and red messages together, and both are true. A customer id typed into the booking URL by hand can show a raw error, such as "Input should be a valid integer", as it did before this branch. The header wraps below 355px wide. Moving a job between customers is listed as a limitation in the README.
+**Findings left alone on purpose, on `connected-workflow`.** Count labels stay plural beside a 1, because they name the metric. A customer's name in the jobs table on their own page still links there, which does no harm. The Next step line appears a moment after the customer's details. Within 5 seconds of a successful save, a refused status change shows the green and red messages together, and both are true. A slow add or edit form still opens the saved record if you click elsewhere while it saves, as it did before this branch. A customer id typed into the booking URL by hand can show a raw error, such as "Input should be a valid integer", as it did before this branch. The header wraps below about 355px wide. Moving a job between customers is listed as a limitation in the README.
 
 **The journey script read too early.** The first run stopped with "element is not enabled", and the next failed four checks. The URL changes a moment before React redraws, and the customer and job pages share a status dropdown and badge, so the script was reading the old page. It now waits for the next page's heading, and every check passed with no change to the app. Each failure could have been a real bug, so each was rerun on a fresh database before being dismissed.
 
@@ -318,7 +318,7 @@ The first commit message on `staff` says unticking Active takes someone off the 
 
 **How to test:** follow [README.md](README.md). Run `pytest` in `backend`, and `npm run lint` and `npm run build` in `frontend`.
 
-**Latest results, on `demo-and-docs`, from a fresh clone of GitHub**
+**Results on `demo-and-docs`, from a fresh clone of GitHub**
 - `pytest`: 114 passed on Python 3.11.4 and on Python 3.12.10.
 - `npm run lint` is clean, and `npm run build` succeeds on Node.js 24.20.
 - Both servers started with the README's exact commands, in Git Bash and in PowerShell, and `python -m app.seed` added the sample data.
@@ -328,7 +328,7 @@ The first commit message on `staff` says unticking Active takes someone off the 
 
 **Results on `ui-design`:** `pytest` 114 passed, `npm run lint` clean, `npm run build` succeeds. A throwaway Playwright script in a scratch folder walked the whole app with real clicks and key presses on a scratch copy of the app, and all its checks passed. Screenshots of 11 pages or states at 1280px and 390px wide showed no sideways scrolling and no console errors.
 
-**Results on `connected-workflow`:** `pytest` 133 passed, `npm run lint` clean, `npm run build` succeeds. On a scratch copy, three throwaway Playwright scripts ran with real clicks. The journey below passed 50 checks, the whole app passed 49, and an empty database passed 6. Screenshots of 12 pages or states at 1280px and 390px wide showed no sideways scrolling and no console errors.
+**Results on `connected-workflow`:** `pytest` 133 passed, `npm run lint` clean, `npm run build` succeeds. On a scratch copy, three throwaway Playwright scripts ran with real clicks. The journey below passed 50 checks, the whole app passed 49, and an empty database passed 6. Screenshots of 12 pages or states at 1280px and 390px wide showed no sideways scrolling and no console errors. A fresh clone of the branch from GitHub passed `pytest`, lint and the build, and left `git status` clean. Breaking each onboarding rule on purpose made a test fail, six breaks out of six. A docs reader followed the README's journey with real clicks, and every step matched.
 
 **Demo script**
 
