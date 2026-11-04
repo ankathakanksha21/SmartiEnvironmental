@@ -7,8 +7,8 @@ Give a fresh session this file and the code, and it can continue without anythin
 - **Step we're in:** 4 of 7, building. `project-setup` is the first of four branches.
 - **On main:** this file, a README title, `.gitignore` and the design.
 - **Working branch:** `project-setup`.
-- **Open PR:** none yet.
-- **Next:** review `project-setup`, raise its PR, and start `customers` after the owner merges it.
+- **Open PR:** [#2](https://github.com/ankathakanksha21/SmartiEnvironmental/pull/2), `project-setup`, waiting for the owner to merge it.
+- **Next:** after that merge, `customers` starts from an up-to-date main.
 - **Deadline:** finish today, 4 November 2026.
 
 ### Plan
