@@ -4,10 +4,10 @@ Give a fresh session this file and the code, and it can continue without anythin
 
 ## 1. Current status
 
-- **Step we're in:** 7 of 7. All the work is done, and the last PR is waiting for the owner to merge it.
-- **On main:** all of brief sections A to D.
-- **Open PR:** [#6](https://github.com/ankathakanksha21/SmartiEnvironmental/pull/6), `demo-and-docs`, with the sample data and final README.
-- **Next:** the owner merges the PR, tries the app and presents it. New work starts only if the owner asks.
+- **Step we're in:** finished. All 7 steps are done.
+- **On main:** all of brief sections A to D, the sample data and the final README.
+- **Open PR:** none.
+- **Next:** the owner tries the app, gives the assessor access to the private repo, and presents the work. New work starts only if the owner asks.
 
 ### Plan
 
@@ -17,7 +17,7 @@ Give a fresh session this file and the code, and it can continue without anythin
 - [x] 4. Build features, one branch and PR at a time: `project-setup`, `customers`, `staff`, `jobs`
 - [x] 5. Test everything and run the demo, on `demo-and-docs`
 - [x] 6. Finish the README and this file, on the same branch
-- [ ] 7. Owner merges the last PR
+- [x] 7. Owner merges the last PR
 
 ## 2. Project summary and checklist
 
@@ -328,7 +328,7 @@ The owner chose an ORM and asked how the folders and code were planned. Claude p
 
 **Step 4, `jobs`.** Claude built the job API, the booking rules and tests, then the job pages, and added job lists to the customer and staff pages. Three independent reviewers found dead code, a raw date error and some weak tests, and Claude fixed them. The owner asked who the end users are and how long was left. Claude said office staff are the users, that fitters and engineers would be the natural next users if login existed, and that about an hour remained. The owner merged the PR.
 
-**Step 5, `demo-and-docs`.** Claude added the sample data and final README, took screenshots to check how the pages look, tested from a fresh clone on both Python versions, and ran the full demo against the brief. Three reviewers then acted as a new developer, a brief auditor and an editor. They found every brief line met and no code bug, plus documentation fixes, which Claude made before raising the last PR.
+**Step 5, `demo-and-docs`.** Claude added the sample data and final README, took screenshots to check how the pages look, tested from a fresh clone on both Python versions, and ran the full demo against the brief. Three reviewers then acted as a new developer, a brief auditor and an editor. They found every brief line met and no code bug, plus documentation fixes, which Claude made before raising the last PR. Claude pointed out that this file names Claude and is visible to anyone with repo access. The owner merged the PR, and Claude confirmed that main passes every check.
 
 ## 10. How to continue
 
