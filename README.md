@@ -70,3 +70,14 @@ pytest
 **Staff**
 1. Click **Staff**, then **Add staff member**. Add a fitter and a maintenance engineer.
 2. Open one, click **Edit details**, untick **Active** and save. Their status changes to Inactive, and they stay in the list.
+
+**Jobs and appointments**
+
+A job is a booked visit, so one record covers both the appointment and the work.
+
+1. Click **Jobs**, then **Book a job**. Click **Book job** without filling anything in to see the errors.
+2. Choose a customer and a staff member, pick a date and time in the future, add a description and save. The job's page opens with the status Pending. Inactive staff aren't offered.
+3. Try booking the same staff member at the same date and time again. The form refuses it.
+4. On the job's page, choose **In Progress** and click **Update status**, then do the same with **Completed**.
+5. Click **Jobs**. **Upcoming** shows future jobs that aren't completed, soonest first. **All jobs** shows everything.
+6. Open the customer and the staff member. Each page lists their jobs.

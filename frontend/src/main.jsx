@@ -6,6 +6,10 @@ import CustomerDetail from './pages/CustomerDetail.jsx'
 import CustomerEdit from './pages/CustomerEdit.jsx'
 import CustomerList from './pages/CustomerList.jsx'
 import CustomerNew from './pages/CustomerNew.jsx'
+import JobDetail from './pages/JobDetail.jsx'
+import JobEdit from './pages/JobEdit.jsx'
+import JobList from './pages/JobList.jsx'
+import JobNew from './pages/JobNew.jsx'
 import NotFound from './pages/NotFound.jsx'
 import StaffDetail from './pages/StaffDetail.jsx'
 import StaffEdit from './pages/StaffEdit.jsx'
@@ -23,6 +27,10 @@ createRoot(document.getElementById('root')).render(
           <Route path="customers/new" element={<CustomerNew />} />
           <Route path="customers/:id" element={<CustomerDetail />} />
           <Route path="customers/:id/edit" element={<CustomerEdit />} />
+          <Route path="jobs" element={<JobList />} />
+          <Route path="jobs/new" element={<JobNew />} />
+          <Route path="jobs/:id" element={<JobDetail />} />
+          <Route path="jobs/:id/edit" element={<JobEdit />} />
           <Route path="staff" element={<StaffList />} />
           <Route path="staff/new" element={<StaffNew />} />
           <Route path="staff/:id" element={<StaffDetail />} />

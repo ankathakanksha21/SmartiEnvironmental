@@ -5,12 +5,21 @@ main.py turns any failure into {field: message} for the frontend forms.
 """
 
 import re
+from datetime import datetime
 from typing import Annotated, Literal
 
-from pydantic import AfterValidator, BaseModel, ConfigDict, ValidationInfo
+from pydantic import (
+    AfterValidator,
+    BaseModel,
+    BeforeValidator,
+    ConfigDict,
+    NaiveDatetime,
+    ValidationInfo,
+)
 
 OnboardingStatus = Literal["New Enquiry", "In Progress", "Active"]
 StaffRole = Literal["Fitter", "Maintenance Engineer"]
+JobStatus = Literal["Pending", "In Progress", "Completed"]
 
 PHONE_PATTERN = re.compile(r"\+?[\d\s()-]+")
 EMAIL_PATTERN = re.compile(r"[^@\s]+@[^@\s]+\.[^@\s]+")
@@ -36,9 +45,32 @@ def valid_email_or_blank(value: str) -> str:
     return value
 
 
+def chosen_from_list(value, info: ValidationInfo):
+    """A dropdown with nothing selected sends an empty string."""
+    if value == "":
+        names = {"customer_id": "a customer", "staff_id": "a staff member"}
+        raise ValueError(f"Choose {names[info.field_name]}.")
+    return value
+
+
+def date_and_time_given(value):
+    if value == "":
+        raise ValueError("Date and time is required.")
+    return value
+
+
+def to_the_minute(value: datetime) -> datetime:
+    """Drop the seconds, so two bookings for 09:30 count as the same time."""
+    return value.replace(second=0, microsecond=0)
+
+
 RequiredText = Annotated[str, AfterValidator(required)]
 Phone = Annotated[str, AfterValidator(valid_phone)]
 OptionalEmail = Annotated[str, AfterValidator(valid_email_or_blank)]
+ChosenId = Annotated[int, BeforeValidator(chosen_from_list)]
+BookingTime = Annotated[
+    NaiveDatetime, BeforeValidator(date_and_time_given), AfterValidator(to_the_minute)
+]
 
 
 class RequestBody(BaseModel):
@@ -91,3 +123,26 @@ class StaffOut(BaseModel):
     role: StaffRole
     phone: str
     is_active: bool
+
+
+class JobDetails(RequestBody):
+    customer_id: ChosenId
+    staff_id: ChosenId
+    description: RequiredText
+    scheduled_at: BookingTime
+
+
+class JobStatusUpdate(BaseModel):
+    status: JobStatus
+
+
+class JobOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: int
+    customer: CustomerOut
+    staff: StaffOut
+    description: str
+    scheduled_at: datetime
+    status: JobStatus
+    is_overdue: bool

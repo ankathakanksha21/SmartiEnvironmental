@@ -11,6 +11,7 @@ export default function Layout() {
           </Link>
           <nav className="site-nav">
             <NavLink to="/customers">Customers</NavLink>
+            <NavLink to="/jobs">Jobs</NavLink>
             <NavLink to="/staff">Staff</NavLink>
           </nav>
         </div>

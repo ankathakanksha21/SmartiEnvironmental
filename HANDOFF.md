@@ -4,11 +4,11 @@ Give a fresh session this file and the code, and it can continue without anythin
 
 ## 1. Current status
 
-- **Step we're in:** 4 of 7, building. `staff` is the third of four branches.
-- **On main:** the design, the running skeleton, and customers with onboarding status.
-- **Working branch:** `staff`.
-- **Open PR:** [#4](https://github.com/ankathakanksha21/SmartiEnvironmental/pull/4), `staff`, waiting for the owner to merge it.
-- **Next:** after that merge, `jobs` starts from an up-to-date main.
+- **Step we're in:** 4 of 7, building. `jobs` is the last of four branches.
+- **On main:** the design, the running skeleton, customers with onboarding status, and the staff list.
+- **Working branch:** `jobs`.
+- **Open PR:** none yet.
+- **Next:** review `jobs`, raise its PR, and start `demo-and-docs` after the owner merges it.
 - **Deadline:** finish today, 4 November 2026.
 
 ### Plan
@@ -32,12 +32,12 @@ A simple web CRM for a business that manages customers, appointments, fitters an
 | A. View and edit a customer record | tested |
 | B. Assign an onboarding status (New Enquiry, In Progress, Active) | tested |
 | B. Update the status as a customer progresses | tested |
-| C. Create an appointment for a customer | not started |
-| C. Assign a date, time and staff member | not started |
-| C. View upcoming appointments | not started |
+| C. Create an appointment for a customer | tested |
+| C. Assign a date, time and staff member | tested |
+| C. View upcoming appointments | tested |
 | D. Maintain a list of fitters and maintenance engineers | tested |
-| D. Assign jobs to individual staff members | not started |
-| D. Track job statuses (Pending, In Progress, Completed) | not started |
+| D. Assign jobs to individual staff members | tested |
+| D. Track job statuses (Pending, In Progress, Completed) | tested |
 | Basic, usable interface | started |
 | Shows data being created, stored, retrieved and updated | started |
 | Logical, maintainable code structure | started |
@@ -122,7 +122,7 @@ Everything in brief sections A to D gets built, with no extras. Main works after
 
 ## 6. Code guide
 
-This is the full layout. Still to come: the job code, `seed.py`, and the shared jobs table.
+This is the full layout. Only `seed.py` is still to come.
 
 ```
 backend/
@@ -139,6 +139,7 @@ frontend/
     main.jsx       starts React and defines the page URLs
     api.js         every call to the backend goes through here
     useForm.js     the state every form needs
+    formatDateTime.js  how dates appear on the pages
     constants.js   status and role lists
     style.css
     components/    shared pieces such as form fields and the jobs table
@@ -194,7 +195,33 @@ A page calls `api.js`, which calls a FastAPI route. FastAPI validates the reques
 
 - The code follows the same pattern as customers: `routes/staff.py`, `Staff` in `models.py`, `StaffCreate`, `StaffDetails` and `StaffOut` in `schemas.py`.
 - Pages: `StaffList`, `StaffDetail`, `StaffNew`, `StaffEdit`. The last two share `StaffForm`.
-- There is no delete. Unticking **Active** on the edit form marks someone inactive. Nothing reads the flag yet, and the `jobs` branch uses it to leave them off the booking list.
+- There is no delete. Unticking **Active** on the edit form marks someone inactive, which leaves them off the booking list.
+
+**Jobs (brief C and the rest of D)**
+
+| API call | What it does |
+|---|---|
+| `GET /api/jobs` | List all, soonest first |
+| `GET /api/jobs?upcoming=true` | Upcoming appointments: future jobs not completed |
+| `GET /api/jobs?customer_id=1` or `?staff_id=1` | One customer's or one staff member's jobs |
+| `POST /api/jobs` | Book. A new job is always Pending |
+| `GET /api/jobs/{id}` | View one |
+| `PUT /api/jobs/{id}` | Edit customer, staff member, date and time, description |
+| `PATCH /api/jobs/{id}/status` | Change status |
+
+**Booking rules, in `booking_errors` in `routes/jobs.py`.** These live in the route because they need the database or the job being edited.
+- The customer and staff member must exist.
+- A staff member must be active, unless the job already has them.
+- The time must be in the future, unless an edit leaves it unchanged.
+- One staff member can't have two open jobs at the same date and time. Jobs have no duration, so only exact matches count, and `to_the_minute` in `schemas.py` drops seconds so that 09:30:00 and 09:30:59 match.
+- Reopening a completed job returns 409 if its slot has since been taken.
+
+**Other job details**
+- `Job.is_overdue` in `models.py` is true when the time has passed and the status is still Pending.
+- `Job.customer` and `Job.staff` are SQLAlchemy relationships, and `JobOut` includes both records. `joinedload` in `list_jobs` fetches them in one query.
+- `JobsTable` loads its own data from a `path` prop, so the jobs page, customer pages and staff pages all reuse it.
+- `JobForm` loads the customer and staff lists for its dropdowns. It keeps an inactive staff member as an option only if the job already has them.
+- A customer's **Book a job** button opens `/jobs/new?customer_id=1`, and `JobNew` starts with that customer selected.
 
 **One request traced: adding a customer**
 1. `CustomerNew.jsx` calls `request('/customers', { method: 'POST', body: values })` when the form is submitted.
@@ -239,12 +266,22 @@ A page calls `api.js`, which calls a FastAPI route. FastAPI validates the reques
 
 **How to test:** follow [README.md](README.md). Run `pytest` in `backend`, and `npm run lint` and `npm run build` in `frontend`.
 
-**Latest results, on `staff`**
-- `pytest`: 57 passed on Python 3.11.
+**Latest results, on `jobs`**
+- `pytest`: 106 passed on Python 3.11.
 - `npm run lint` is clean, and `npm run build` succeeds.
 - The frontend has no automated tests. Its pages get checked in the browser.
 
-**Browser check of the staff pages**, run by calling `click()` from JavaScript on the real page, because the Browser pane was hidden
+**Browser check of the job pages**, run by calling `click()` from JavaScript on the real page, because the Browser pane was hidden
+- A blank form showed an error for all four fields. A past date was refused and the typed description stayed.
+- The staff dropdown left out inactive staff. A valid job saved as Pending and appeared under Upcoming.
+- A second booking for the same person and time was refused. A different time saved.
+- Status moved to In Progress and then Completed, and the job left Upcoming but stayed in All jobs.
+- Its slot then became free for a new booking, and reopening the old job showed the clash message.
+- Customer and staff pages listed their jobs, and **Book a job** from a customer page started with that customer selected.
+- A past Pending job showed Overdue. Its description could be corrected without changing its time or its inactive staff member, but moving it to another past time was refused.
+- `/jobs/999` showed "Job not found."
+
+**Browser check of the staff pages**, run the same way
 - A blank form showed errors for name and phone, and a bad phone kept the typed name.
 - A valid staff member saved as Active, and the add form has no active checkbox.
 - The edit form showed Active ticked. Unticking it and saving changed the status to Inactive.
@@ -297,7 +334,9 @@ The owner chose an ORM and asked how the folders and code were planned. Claude p
 
 **Step 4, `customers`.** Claude built the customer API, validation rules and tests, then the React pages, and checked each flow in the browser. Two independent reviewers found a data-loss bug and some weak tests, and Claude fixed them (section 7). The owner merged the PR.
 
-**Step 4, `staff`.** Claude built the staff API, tests and pages, following the customer pattern, and checked each flow in the browser. Two independent reviewers found that an API edit could reactivate someone by accident, and Claude fixed it. While the review ran, the owner asked for the workflow as a flow chart, and Claude drew three: how a save moves through the app, how office staff use the CRM, and how each feature gets built.
+**Step 4, `staff`.** Claude built the staff API, tests and pages, following the customer pattern, and checked each flow in the browser. Two independent reviewers found that an API edit could reactivate someone by accident, and Claude fixed it. While the review ran, the owner asked for the workflow as a flow chart, and Claude drew three: how a save moves through the app, how office staff use the CRM, and how each feature gets built. The owner merged the PR.
+
+**Step 4, `jobs`.** Claude built the job API, the booking rules and 49 more tests, then the job pages, and added job lists to the customer and staff pages. Each flow got checked in the browser.
 
 ## 10. How to continue
 
