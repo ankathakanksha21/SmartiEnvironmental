@@ -1,4 +1,4 @@
-import { useNavigate } from 'react-router'
+import { useNavigate, useOutletContext } from 'react-router'
 import { request } from '../api.js'
 import CustomerForm from '../components/CustomerForm.jsx'
 
@@ -12,9 +12,11 @@ const EMPTY_CUSTOMER = {
 
 export default function CustomerNew() {
   const navigate = useNavigate()
+  const showMessage = useOutletContext()
 
   async function save(values) {
     const customer = await request('/customers', { method: 'POST', body: values })
+    showMessage('Customer added.')
     navigate(`/customers/${customer.id}`)
   }
 

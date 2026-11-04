@@ -3,7 +3,7 @@ import '@fontsource/poppins/500.css'
 import '@fontsource/poppins/700.css'
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
-import { BrowserRouter, Navigate, Route, Routes } from 'react-router'
+import { BrowserRouter, Route, Routes } from 'react-router'
 import Layout from './components/Layout.jsx'
 import CustomerDetail from './pages/CustomerDetail.jsx'
 import CustomerEdit from './pages/CustomerEdit.jsx'
@@ -14,6 +14,7 @@ import JobEdit from './pages/JobEdit.jsx'
 import JobList from './pages/JobList.jsx'
 import JobNew from './pages/JobNew.jsx'
 import NotFound from './pages/NotFound.jsx'
+import Overview from './pages/Overview.jsx'
 import StaffDetail from './pages/StaffDetail.jsx'
 import StaffEdit from './pages/StaffEdit.jsx'
 import StaffList from './pages/StaffList.jsx'
@@ -25,7 +26,7 @@ createRoot(document.getElementById('root')).render(
     <BrowserRouter>
       <Routes>
         <Route element={<Layout />}>
-          <Route index element={<Navigate to="/customers" replace />} />
+          <Route index element={<Overview />} />
           <Route path="customers" element={<CustomerList />} />
           <Route path="customers/new" element={<CustomerNew />} />
           <Route path="customers/:id" element={<CustomerDetail />} />

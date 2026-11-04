@@ -1,5 +1,6 @@
-import { Link, useParams } from 'react-router'
+import { Link, useOutletContext, useParams } from 'react-router'
 import { request, useApi } from '../api.js'
+import CustomerNextStep from '../components/CustomerNextStep.jsx'
 import ErrorMessage from '../components/ErrorMessage.jsx'
 import JobsTable from '../components/JobsTable.jsx'
 import StatusForm from '../components/StatusForm.jsx'
@@ -7,6 +8,7 @@ import { ONBOARDING_STATUSES } from '../constants.js'
 
 export default function CustomerDetail() {
   const { id } = useParams()
+  const showMessage = useOutletContext()
   const { data: customer, error, loading, reload } = useApi(`/customers/${id}`)
 
   if (loading) return <p>Loading...</p>
@@ -18,6 +20,7 @@ export default function CustomerDetail() {
       body: { onboarding_status: status },
     })
     reload()
+    showMessage('Onboarding status updated.')
   }
 
   return (
@@ -28,6 +31,8 @@ export default function CustomerDetail() {
           Edit details
         </Link>
       </div>
+
+      <CustomerNextStep customerId={id} />
 
       <dl className="details">
         <dt>Phone</dt>

@@ -1,4 +1,4 @@
-import { useNavigate, useParams } from 'react-router'
+import { useNavigate, useOutletContext, useParams } from 'react-router'
 import { request, useApi } from '../api.js'
 import ErrorMessage from '../components/ErrorMessage.jsx'
 import JobForm from '../components/JobForm.jsx'
@@ -6,6 +6,7 @@ import JobForm from '../components/JobForm.jsx'
 export default function JobEdit() {
   const { id } = useParams()
   const navigate = useNavigate()
+  const showMessage = useOutletContext()
   const { data: job, error, loading } = useApi(`/jobs/${id}`)
 
   if (loading) return <p>Loading...</p>
@@ -13,6 +14,7 @@ export default function JobEdit() {
 
   async function save(values) {
     await request(`/jobs/${id}`, { method: 'PUT', body: values })
+    showMessage('Job saved.')
     navigate(`/jobs/${id}`)
   }
 

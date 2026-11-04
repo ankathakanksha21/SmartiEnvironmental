@@ -1,5 +1,6 @@
-import { Link, useParams } from 'react-router'
+import { Link, useOutletContext, useParams } from 'react-router'
 import { request, useApi } from '../api.js'
+import CustomerNextStep from '../components/CustomerNextStep.jsx'
 import ErrorMessage from '../components/ErrorMessage.jsx'
 import StatusBadge from '../components/StatusBadge.jsx'
 import StatusForm from '../components/StatusForm.jsx'
@@ -8,6 +9,7 @@ import { formatDateTime } from '../formatDateTime.js'
 
 export default function JobDetail() {
   const { id } = useParams()
+  const showMessage = useOutletContext()
   const { data: job, error, loading, reload } = useApi(`/jobs/${id}`)
 
   if (loading) return <p>Loading...</p>
@@ -16,6 +18,7 @@ export default function JobDetail() {
   async function saveStatus(status) {
     await request(`/jobs/${id}/status`, { method: 'PATCH', body: { status } })
     reload()
+    showMessage('Job status updated.')
   }
 
   return (
@@ -27,6 +30,8 @@ export default function JobDetail() {
         </Link>
       </div>
 
+      {job.status === 'Completed' && <CustomerNextStep customerId={job.customer.id} />}
+
       <dl className="details">
         <dt>Date and time</dt>
         <dd>
@@ -37,6 +42,7 @@ export default function JobDetail() {
         <dt>Customer</dt>
         <dd>
           <Link to={`/customers/${job.customer.id}`}>{job.customer.name}</Link>
+          <div className="muted">Onboarding status: {job.customer.onboarding_status}</div>
           <div className="muted">{job.customer.phone}</div>
           <div className="muted keep-line-breaks">{job.customer.address}</div>
         </dd>

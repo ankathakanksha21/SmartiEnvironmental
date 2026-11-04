@@ -4,11 +4,11 @@ Give a fresh session this file and the code, and it can continue without anythin
 
 ## 1. Current status
 
-- **Step we're in:** finished. The 7 planned steps and the design refresh the owner asked for afterwards are all done.
-- **On main:** all of brief sections A to D, the sample data, the final README and the Smarti-branded design.
-- **Open PR:** none.
-- **Next:** the owner tries the app, gives the assessor access to the private repo, and presents the work. New work starts only if the owner asks.
-- **Optional idea, not started:** the sample data uses generic wording such as "Fit the new unit". It could use Smarti's real product wording, such as waterless valves. The owner hasn't asked for this.
+- **Step we're in:** Step 9, `connected-workflow`, waiting for the owner to merge.
+- **On main:** All of brief sections A to D, the sample data, the final README and the Smarti-branded design.
+- **On this branch:** Six small additions that connect the steps into one journey (section 4).
+- **Open PR:** #10, on `connected-workflow`.
+- **Next:** The owner merges the PR. Claude then checks main and corrects this status in a small follow-up PR, as with PR #7 and PR #9. After that, the owner tries the app, gives the assessor access to the private repo, and presents the work. New work starts only if the owner asks.
 
 ### Plan
 
@@ -19,12 +19,14 @@ Give a fresh session this file and the code, and it can continue without anythin
 - [x] 5. Test everything and run the demo, on `demo-and-docs`
 - [x] 6. Finish the README and this file, on the same branch
 - [x] 7. Owner merges the last PR
+- [x] 8. Design refresh the owner asked for, on `ui-design`
+- [ ] 9. Connect the steps into one workflow, on `connected-workflow`, after the owner's cross-check
 
 ## 2. Project summary and checklist
 
 A simple web CRM for a business that manages customers, appointments, fitters and maintenance engineers. It is an assessment take-home, and the assessor cares more about the approach, the decisions and how clearly the work is explained than about production readiness. Authentication, hosting, advanced security and complex integrations are not required. AI tools are allowed.
 
-Office staff are the end users. The brief doesn't name them, so this is Claude's reading, which the owner asked about and didn't object to. Fitters and engineers are records that jobs get assigned to, and customers don't use the app.
+Office staff are the end users. The brief doesn't name them, so this is Claude's reading, which the owner asked about and didn't object to. Fitters and engineers are records that jobs get assigned to, and customers don't use the app. The brief lists features rather than what each kind of user wants, so an office admin is fully covered, and a manager, fitter or engineer only partly.
 
 This table is the brief, with the state of each item.
 
@@ -52,6 +54,8 @@ This table is the brief, with the state of each item.
 | README: build order, challenges and fixes, limitations, how it was tested | reviewed |
 | README: explains the feature prioritisation | reviewed |
 
+The six additions on `connected-workflow` go beyond this table, and the owner approved them (section 4).
+
 The code must be understandable, and the owner must be able to explain it. Another developer must be able to follow the docs, understand what was built and why, and continue the work.
 
 ## 3. Working rules
@@ -69,7 +73,7 @@ These come from the owner and apply to every session.
 
 **Building**
 - Take the minimal path, and don't over-complicate.
-- Add no features beyond the brief.
+- Add no features beyond the brief unless the owner approves them.
 - No temporary fixes or shortcuts. Everything built must be finished and working.
 - Within that minimal path, aim for the best approach and the best decisions.
 - Work through new decisions with the owner, and give the reasoning behind each one. The decisions in section 5 are settled.
@@ -86,7 +90,10 @@ These come from the owner and apply to every session.
 
 ## 4. Feature priorities
 
-Everything in brief sections A to D got built. The one small extra is the Overdue label (section 5). Main worked after every merge.
+Everything in brief sections A to D got built, and main worked after every merge. There are two sets of small extras:
+
+- The Overdue label (section 5), from the design.
+- Six additions on `connected-workflow`. The owner's cross-check showed that the records were linked but the steps weren't, and the owner approved these to connect them. They are an Overview home page, success messages, clickable names in job lists, onboarding that follows the jobs, a Next step line on the customer's page, and a follow-up maintenance visit after a completed job.
 
 | Order | Branch | What it added | Why then |
 |---|---|---|---|
@@ -96,11 +103,15 @@ Everything in brief sections A to D got built. The one small extra is the Overdu
 | 4 | `staff` | API and pages for the staff list from brief D | Jobs get assigned to staff. |
 | 5 | `jobs` | API and pages for brief C and the rest of D | It needs both tables above and holds the most rules. |
 | 6 | `demo-and-docs` | Sample data, demo run, final README | The docs describe the finished app. |
+| 7 | `ui-design` | Smarti's colours, font and cards | The owner asked for it after trying the app. It changes no behaviour. |
+| 8 | `connected-workflow` | The six additions above | The owner approved them after a cross-check. They build on every finished feature. |
 
 **Left out on purpose**
 - Deleting records. The brief doesn't ask for it, and keeping records protects job history.
 - A Cancelled job status. The brief lists three statuses. Until one is added, a cancelled visit can only be edited or marked Completed.
 - Search, job durations, status history and login. The brief doesn't ask for them.
+- A duplicate-customer check. Claude offered it as a seventh addition, and the owner chose the six.
+- Recording the work done on a job. It would need a new column, and the six additions need no database change.
 
 ## 5. Design decisions
 
@@ -128,6 +139,16 @@ Everything in brief sections A to D got built. The one small extra is the Overdu
 | Small blue text | Smarti's sky blue, or a darker shade | `#2b73a0` for table headers, labels and the focus outline | Smarti's `#509EC7` is about 3:1 on white, too low for small text. It stays for the top strip, link underlines and focus on the navy header. |
 | Corners | Rounded, or square like Smarti's site | Buttons and fields square, cards and badges only 3 to 4px | The owner asked for cards, and a small radius keeps them looking like cards while staying close to the brand. |
 | Font | System fonts, a Google Fonts link, or a package | Poppins, Smarti's font, through `@fontsource/poppins` | The package works offline and needs no extra setup step beyond `npm install`. A Google Fonts link would need internet to look right. |
+| Where validation runs | Repeat the rules in the browser, or keep them in the backend | Backend only. Forms use `noValidate` and show the API's errors | Each rule has one copy. The owner confirmed this in the cross-check. |
+| Sample data wording | Generic, or Smarti's product wording | Stays as it is | The owner's choice in the cross-check. |
+| Home page | A redirect to Customers, or an Overview | Overview | It shows what needs attention first, and each count links to the page behind it. It reads the existing API, so it adds no backend code. |
+| Onboarding status | Only by hand, or following the jobs | Follows the jobs, and can still be set by hand | Booking takes New Enquiry to In Progress, and completing a job makes the customer Active. A separate manual step would let the status disagree with the jobs. |
+| When a job reopens | Move onboarding back, or leave it | Leave it | The office may have set the status by hand, and a reopened job may be a correction. The README lists this as a limitation. |
+| Next step | Store it, or work it out from the jobs | Worked out by one shared component from the customer's jobs, on the customer's page and on a completed job's page | A stored value could go stale, one component means the two pages can't disagree, and this needs no database change. |
+| Next step wording | "Visit" or "job" | "Book the first job" and "Complete the job on...", and "Book a follow-up maintenance visit" | "Job" matches the **Book a job** button and the job pages, so the two don't look like different things. The follow-up stays a maintenance visit, the term the owner uses. |
+| Success messages | A toast library, React Router's location state, or React state in `Layout` | React state in `Layout`, shown for 5 seconds at the bottom of the screen | It needs no new package. Location state came first, and the review showed why it's wrong (section 7). A message may stay on screen for its 5 seconds after you move to another page, which does no harm. |
+| Follow-up visit | A job type, a link between jobs, or a filled-in form | A filled-in form, `/jobs/new?customer_id=1&description=...` | It needs no database change, and the office can change anything before saving. |
+| Customer's status on a job page | A badge beside the name, or a labelled line | A labelled line, "Onboarding status: In Progress" | The onboarding and job statuses share words such as In Progress, so an unlabelled badge read as the job's own status. |
 | Where this file lives | Committed, or local only | Committed to the repo root | It's backed up, and a fresh session gets it with one clone. It holds no prompts. |
 | AI attribution lines | Keep, or remove | Removed | The owner's choice. |
 | AI mention in the README | One line, or none | None | The owner's choice. |
@@ -147,6 +168,8 @@ A page calls `api.js`, which calls a FastAPI route. FastAPI validates the reques
 - `api.js` holds `request()`, which makes every call and turns failures into an `ApiError`, and `useApi()`, which loads data for a page. `useApi` reports `loading` until the response for the current URL arrives. Pages remove their forms while loading, so a form can't save one record's values over another.
 - `useForm.js` holds a form's values, errors and saving state.
 - `StatusForm`, `StatusBadge`, `Field` and `ErrorMessage` are shared by all three features.
+- `Layout.jsx` draws the header and the success message. It keeps the message in React state, clears it after 5 seconds, and hands `showMessage` to the current page through `<Outlet context>`. A page gets it with `useOutletContext()`.
+- `CustomerNextStep` draws the highlighted Next step line from a customer's jobs. The customer's page and a completed job's page use it.
 - `vite.config.js` forwards `/api` calls to FastAPI on port 8000.
 
 **Customers (brief A and B)**
@@ -194,9 +217,19 @@ Pages: `StaffList`, `StaffDetail`, `StaffNew`, `StaffEdit`. The last two share `
 **Other job details**
 - `Job.is_overdue` in `models.py` is true when the time has passed and the status is still Pending.
 - `Job.customer` and `Job.staff` are SQLAlchemy relationships, and `JobOut` includes both records. `joinedload` in `list_jobs` fetches them in one query.
-- `JobsTable` loads its own data from a `path` prop, so the jobs page, customer pages and staff pages all reuse it.
+- `JobsTable` loads its own data from a `path` prop, so the Overview, the jobs page, customer pages and staff pages all reuse it. A `limit` prop shows only the first few, and customer and staff names link to their pages.
 - `JobForm` loads the customer and staff lists for its dropdowns. It keeps an inactive staff member as an option only if the job already has them.
-- A customer's **Book a job** button opens `/jobs/new?customer_id=1`, and `JobNew` starts with that customer selected.
+- A customer's **Book a job** button opens `/jobs/new?customer_id=1`, and `JobNew` starts with that customer selected. It also reads `description` from the URL, for follow-up visits.
+
+**Onboarding that follows the jobs, in `routes/jobs.py`**
+- `start_onboarding` moves a New Enquiry customer to In Progress. `create_job` calls it, and `update_job` calls it only when the job moves to another customer. Any other edit leaves a status set by hand alone. Both call it after their checks pass, so a refused request changes nothing.
+- `update_job_status` makes the customer Active when a job becomes Completed. Reopening a job leaves the customer as they are.
+- Each change saves in the same `db.commit()` as the job.
+
+**The connected pages**
+- `Overview.jsx` loads customers, all jobs, upcoming jobs and staff through the existing API calls and works out the counts in the browser. Staff workload lists active staff, plus anyone inactive who still has open jobs.
+- `CustomerNextStep` reads the customer's jobs. With none, it offers the first job. With an open job, it links to the earliest one and says if it's overdue. With every job completed, it offers a follow-up maintenance visit.
+- `JobDetail.jsx` shows that line once the job is Completed, and shows the customer's onboarding status as a labelled line under their name.
 
 **Sample data.** `seed.py` adds 4 customers, 4 staff members and 7 jobs. Dates are relative to today, so Upcoming and the Overdue label always have something to show. It adds nothing if the database already has customers, so running it twice can't duplicate records.
 
@@ -210,6 +243,7 @@ Pages: `StaffList`, `StaffDetail`, `StaffNew`, `StaffEdit`. The last two share `
 - **`useState`.** A value a component remembers between renders.
 - **`useEffect`.** Code that runs after a render. Here it loads data when the URL changes.
 - **Vite proxy.** The dev server passes `/api` calls to FastAPI, so the browser only ever talks to one address.
+- **`useOutletContext`.** How a page gets something from the layout around it. Here it's `showMessage`.
 
 **One request traced: adding a customer**
 1. `CustomerNew.jsx` calls `request('/customers', { method: 'POST', body: values })` when the form is submitted.
@@ -252,6 +286,22 @@ Pages: `StaffList`, `StaffDetail`, `StaffNew`, `StaffEdit`. The last two share `
 | `demo-and-docs` | This file's status was out of date, and section 10 sent a session to the wrong branch | Corrected |
 | `demo-and-docs` | The README never said to clone the repo or reload after seeding, and left out the Overdue label | Added |
 | `demo-and-docs` | "By hand" overstated the page checks, which used scripted clicks | Reworded |
+| `connected-workflow` | Saving any job edit re-ran the onboarding rule and overwrote a status set by hand. Two reviewers found this separately, and no test covered it | The rule only runs when a job moves to another customer. Added tests |
+| `connected-workflow` | The success message lived in browser history, so a reload or Back showed it again. A slow status save could pull you back to the page you'd left, and the timer that cleared the message could cancel a link click | Moved it into React state in `Layout` |
+| `connected-workflow` | On a phone, the message from a status save appeared off-screen. On desktop, the page jumped about 72px when it cleared | Fixed it to the bottom of the screen |
+| `connected-workflow` | A completed job's page offered a follow-up even when one was already booked, which contradicted the customer's page | Both pages now share `CustomerNextStep` |
+| `connected-workflow` | The onboarding badge on the job page read as the job's own status | A labelled line under the customer's name |
+| `connected-workflow` | The four counts wrapped 3 and 1 at tablet widths, and stacked on phones so no appointment showed on the first screen | Four across, or two rows at 975px and under |
+| `connected-workflow` | The Next step bar broke the rule on where green goes, and its text sat 3px off the card below | Sky blue, and lined up |
+| `connected-workflow` | The count cards didn't look clickable, and on a touch screen had no hover to show it | Underlined labels, like other links |
+| `connected-workflow` | "Visit" and "job" named the same thing on one page, and the follow-up link was written in two files | One word and one component |
+| `connected-workflow` | The new CSS repeated the card and label rules, and some tests couldn't fail when their rule broke | Grouped the rules. Five more test cases, and two tests corrected |
+
+**How far the `connected-workflow` review went.** Three reviewers checked the branch, and a second reviewer for each tried to disprove the findings. The one for the visual findings finished, confirming nine of the 17 and refuting eight. The other two hadn't finished after about 30 minutes, so Claude stopped them to meet the deadline. Their main findings are fixed, and each fix has a test or a scripted click check.
+
+**Findings left alone on purpose, on `connected-workflow`.** Count labels stay plural beside a 1, because they name the metric. A customer's name in the jobs table on their own page still links there, which does no harm. The Next step line appears a moment after the customer's details. Within 5 seconds of a successful save, a refused status change shows the green and red messages together, and both are true. A slow add or edit form still opens the saved record if you click elsewhere while it saves, as it did before this branch. A customer id typed into the booking URL by hand can show a raw error, such as "Input should be a valid integer", as it did before this branch. The header wraps below about 355px wide. Moving a job between customers is listed as a limitation in the README.
+
+**The journey script read too early.** The first run stopped with "element is not enabled", and the next failed four checks. The URL changes a moment before React redraws, and the customer and job pages share a status dropdown and badge, so the script was reading the old page. It now waits for the next page's heading, and every check passed with no change to the app. Each failure could have been a real bug, so each was rerun on a fresh database before being dismissed.
 
 The first commit message on `staff` says unticking Active takes someone off the booking list, which only became true in `jobs`. Claude left it, because rewriting it would need a force-push.
 
@@ -268,7 +318,7 @@ The first commit message on `staff` says unticking Active takes someone off the 
 
 **How to test:** follow [README.md](README.md). Run `pytest` in `backend`, and `npm run lint` and `npm run build` in `frontend`.
 
-**Latest results, on `demo-and-docs`, from a fresh clone of GitHub**
+**Results on `demo-and-docs`, from a fresh clone of GitHub**
 - `pytest`: 114 passed on Python 3.11.4 and on Python 3.12.10.
 - `npm run lint` is clean, and `npm run build` succeeds on Node.js 24.20.
 - Both servers started with the README's exact commands, in Git Bash and in PowerShell, and `python -m app.seed` added the sample data.
@@ -278,13 +328,29 @@ The first commit message on `staff` says unticking Active takes someone off the 
 
 **Results on `ui-design`:** `pytest` 114 passed, `npm run lint` clean, `npm run build` succeeds. A throwaway Playwright script in a scratch folder walked the whole app with real clicks and key presses on a scratch copy of the app, and all its checks passed. Screenshots of 11 pages or states at 1280px and 390px wide showed no sideways scrolling and no console errors.
 
+**Results on `connected-workflow`:** `pytest` 133 passed, `npm run lint` clean, `npm run build` succeeds. On a scratch copy, three throwaway Playwright scripts ran with real clicks. The journey below passed 50 checks, the whole app passed 49, and an empty database passed 6. Screenshots of 12 pages or states at 1280px and 390px wide showed no sideways scrolling and no console errors. A fresh clone of the branch from GitHub passed `pytest`, lint and the build, and left `git status` clean. Breaking each onboarding rule on purpose made a test fail, six breaks out of six. A docs reader followed the README's journey with real clicks, and every step matched.
+
 **Demo script**
 
-Start both servers, add the sample data, and open http://localhost:5173. Every step passed on the fresh clone, using scripted clicks on the real pages.
+Start both servers, add the sample data, and open http://localhost:5173. Every step passed using scripted clicks on the real pages, on a fresh clone for `demo-and-docs` and on a scratch copy for `connected-workflow`.
+
+**The connected journey**
+
+| Step | What to do | What you should see |
+|---|---|---|
+| Overview | Open the app | Four counts, the next appointments, and each person's open jobs |
+| Enquiry | Click **New enquiries**, then **Chloe Evans** | Status New Enquiry, and Next step says to book the first job |
+| Booking | Click **Book the first job**, then choose Sam Patel, a date and time in the future and a description, and save | The form starts with Chloe selected, then "Job booked." appears and the job's page says "Onboarding status: In Progress" |
+| Customer's page | Click Chloe's name | Status In Progress, and Next step says to complete the job on that date |
+| Completion | Click the Next step link, choose Completed and click **Update status** | "Job status updated." appears, the job's page says "Onboarding status: Active", and Next step offers a follow-up maintenance visit |
+| Follow-up | Click **Book a follow-up maintenance visit**, then choose Priya Shah and a date and time in the future, and save | The form starts with Chloe and "Maintenance visit" filled in, and Chloe stays Active |
+| Back to the start | Click **Overview** | New enquiries has dropped by one, and Priya Shah has one more open job |
+
+**The brief, item by item**
 
 | Brief item | What to do | What you should see |
 |---|---|---|
-| A. List customers | Open the app | The customer list, in name order |
+| A. List customers | Click **Customers** | The customer list, in name order |
 | A. Validation | Click **Add customer**, then submit it blank | An error under name, phone and address |
 | A and B. Add a customer | Enter a bad email and pick an onboarding status, then correct the email and save | The email error appears and the typed values stay, then the customer's page opens with that status |
 | A. Edit a customer | Click **Edit details** and change the address | The new address on their page |
@@ -348,6 +414,12 @@ The owner chose an ORM and asked how the folders and code were planned. Claude p
 
 The owner then shared two screenshots of smartilimited.com and asked whether Claude had considered them. Claude said it hadn't: no images had come through, and it had also misread "green underlining" as something to remove. The owner's business is now clear from that site: Smarti Environmental makes waterless urinal valves, and its customers get installation and maintenance. Claude read the brand's fonts and colours from the live site and redid the design to match. Reviewers measured it against the owner's images, Claude fixed what they found, and the owner merged the PR.
 
+**After the plan, `connected-workflow`.** The owner cross-checked the app and asked four things: whether validation covers both backend and frontend, whether the sample data is realistic, whether the app feels like a business tool, and whether it works as one journey from enquiry to maintenance. Claude said the backend enforces the rules and the frontend displays the errors, that the sample data is partly realistic, that the app was closer to good CRUD pages than a tool, and that the records were linked while the steps weren't. The owner kept validation and the sample data as they were, and asked for minimal suggestions to make the app feel more like a tool and more like a story, while staying close to the brief.
+
+The owner also asked whether the app should be designed around what each kind of user wants, whether it confirms every important action, and whether it avoids duplicates and stale job details. Claude said the brief lists features rather than users, so the design matches it, with an office admin fully covered and a manager, fitter or engineer partly covered. Errors were shown but successes weren't. Duplicate customers weren't prevented, and job details stay current because each visit is one record read live.
+
+Claude suggested six additions and offered a duplicate check as a seventh. The owner chose the six. Claude built them on one branch and tested them with real clicks on a scratch copy, so the owner's data stayed untouched. Independent reviewers then checked the branch (section 7).
+
 ## 10. How to continue
 
 1. Read section 1, then section 3.
@@ -375,6 +447,7 @@ The owner then shared two screenshots of smartilimited.com and asked whether Cla
 - Stopping a server that was started through a Git Bash wrapper left its Vite process running. Check ports 8000 and 5173 before trusting what answers there.
 - A running Vite server can't find a package installed after it started, and the page goes blank with a 500 error. Restart `npm run dev` after `npm install`.
 - `playwright-core` with the installed Chrome (`channel: 'chrome'`) gives real clicks and screenshots even when the Browser pane is hidden. Keep it in a scratch folder, because the project doesn't need it.
+- In a browser script, the URL changes a moment before React redraws, and the customer and job pages share a status dropdown and badge. Wait for the next page's heading before reading anything.
 - The repo has no automated checks on GitHub, so a PR shows no CI results. Tests run locally.
 - Known limitations are in the README. In testing, simultaneous requests double-booked 4 of 10 slots in one run and 8 of 10 in another.
 - The README is written in the owner's voice and leaves out AI by the owner's choice, while this file records how the work was done.
