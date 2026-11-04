@@ -242,6 +242,13 @@ textarea {
   font-size: 14px;
 }
 
+.checkbox {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
 .form-actions {
   display: flex;
   align-items: center;
@@ -278,6 +285,11 @@ textarea {
 .badge-active {
   background: #dcf3e8;
   color: #17643f;
+}
+
+.badge-inactive {
+  background: #e9ecec;
+  color: #4f5b58;
 }
 
 /* Messages */

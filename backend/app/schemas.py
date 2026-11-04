@@ -10,6 +10,7 @@ from typing import Annotated, Literal
 from pydantic import AfterValidator, BaseModel, ConfigDict, ValidationInfo
 
 OnboardingStatus = Literal["New Enquiry", "In Progress", "Active"]
+StaffRole = Literal["Fitter", "Maintenance Engineer"]
 
 PHONE_PATTERN = re.compile(r"\+?[\d\s()-]+")
 EMAIL_PATTERN = re.compile(r"[^@\s]+@[^@\s]+\.[^@\s]+")
@@ -70,3 +71,23 @@ class CustomerOut(BaseModel):
     email: str
     address: str
     onboarding_status: OnboardingStatus
+
+
+class StaffCreate(RequestBody):
+    name: RequiredText
+    role: StaffRole
+    phone: Phone
+
+
+class StaffDetails(StaffCreate):
+    is_active: bool
+
+
+class StaffOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: int
+    name: str
+    role: StaffRole
+    phone: str
+    is_active: bool
