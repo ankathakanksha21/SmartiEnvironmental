@@ -114,9 +114,12 @@ def update_job(job_id: int, details: JobDetails, db: Session = Depends(get_db)):
     if errors:
         return JSONResponse(status_code=422, content={"errors": errors})
 
+    # Only a job moved to another customer counts as a new booking for them. Any other
+    # edit leaves a status set by hand alone.
+    if details.customer_id != job.customer_id:
+        start_onboarding(db.get(Customer, details.customer_id))
     for field, value in details.model_dump().items():
         setattr(job, field, value)
-    start_onboarding(db.get(Customer, details.customer_id))
     db.commit()
     return job
 

@@ -1,4 +1,4 @@
-import { useNavigate, useParams } from 'react-router'
+import { useNavigate, useOutletContext, useParams } from 'react-router'
 import { request, useApi } from '../api.js'
 import CustomerForm from '../components/CustomerForm.jsx'
 import ErrorMessage from '../components/ErrorMessage.jsx'
@@ -6,6 +6,7 @@ import ErrorMessage from '../components/ErrorMessage.jsx'
 export default function CustomerEdit() {
   const { id } = useParams()
   const navigate = useNavigate()
+  const showMessage = useOutletContext()
   const { data: customer, error, loading } = useApi(`/customers/${id}`)
 
   if (loading) return <p>Loading...</p>
@@ -13,7 +14,8 @@ export default function CustomerEdit() {
 
   async function save(values) {
     await request(`/customers/${id}`, { method: 'PUT', body: values })
-    navigate(`/customers/${id}`, { state: { message: 'Customer details saved.' } })
+    showMessage('Customer details saved.')
+    navigate(`/customers/${id}`)
   }
 
   const { name, phone, email, address } = customer

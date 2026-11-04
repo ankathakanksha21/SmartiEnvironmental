@@ -173,17 +173,13 @@ main > p {
 /* Overview counts */
 .stat-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  grid-template-columns: repeat(4, 1fr);
   gap: 16px;
 }
 
 .stat-card {
   display: block;
   padding: 20px;
-  border: 1px solid var(--border);
-  border-radius: 4px;
-  background: var(--surface);
-  box-shadow: var(--shadow-card);
   text-decoration: none;
   transition: border-color 120ms ease;
 }
@@ -200,29 +196,31 @@ main > p {
   line-height: 1.2;
 }
 
+/* The whole card is a link, and the label shows it with the same underline as other links. */
 .stat-label {
-  color: var(--sky-text);
-  font-size: 14px;
-  font-weight: 700;
+  text-decoration: underline;
+  text-decoration-color: var(--sky);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 4px;
 }
 
-/* What to do next on a customer or job page */
+.stat-card:hover .stat-label {
+  text-decoration-color: var(--green);
+  text-decoration-thickness: 2px;
+}
+
+/* What to do next on a customer or job page. Its text lines up with the card below. */
 .next-step {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   gap: 4px 14px;
   margin-bottom: 20px;
-  padding: 14px 20px;
-  border-left: 4px solid var(--green);
+  padding: 14px 20px 14px 17px;
+  border-left: 4px solid var(--sky);
+  border-radius: 4px;
   background: var(--surface);
   box-shadow: var(--shadow-card);
-}
-
-.next-step-label {
-  color: var(--sky-text);
-  font-size: 14px;
-  font-weight: 700;
 }
 
 /* Upcoming and All jobs links */
@@ -289,11 +287,12 @@ button:disabled {
   color: #ffffff;
 }
 
-/* Cards: tables, record details, forms and the status row */
+/* Cards: tables, record details, forms, the status row and the Overview counts */
 .table-wrap,
 .details,
 .form,
-.status-form-row {
+.status-form-row,
+.stat-card {
   border: 1px solid var(--border);
   border-radius: 4px;
   background: var(--surface);
@@ -348,7 +347,9 @@ tbody tr:hover td {
   padding: 24px 20px;
 }
 
-.details dt {
+.details dt,
+.stat-label,
+.next-step-label {
   color: var(--sky-text);
   font-size: 14px;
   font-weight: 700;
@@ -532,26 +533,36 @@ textarea:focus {
 }
 
 /* Messages */
-.success-box {
-  margin-bottom: 20px;
+.success-box,
+.error-box {
   padding: 14px 18px;
-  border: 1px solid #c5e39c;
   border-radius: 4px;
-  background: #ebf6de;
-  color: #33690a;
   font-size: 14px;
   font-weight: 500;
 }
 
+/* Fixed, so it stays on screen after a save low on the page, and the page doesn't jump
+   when it goes. It only shows text, so clicks pass through to the page beneath. */
+.success-box {
+  position: fixed;
+  z-index: 10;
+  right: 16px;
+  bottom: 16px;
+  left: 16px;
+  max-width: 560px;
+  margin: 0 auto;
+  border: 1px solid #c5e39c;
+  background: #ebf6de;
+  color: #33690a;
+  box-shadow: var(--shadow-card);
+  pointer-events: none;
+}
+
 .error-box {
   margin-bottom: 20px;
-  padding: 14px 18px;
   border: 1px solid var(--error-border);
-  border-radius: 4px;
   background: var(--error-soft);
   color: var(--error);
-  font-size: 14px;
-  font-weight: 500;
 }
 
 .error-box p {
@@ -576,6 +587,13 @@ textarea:focus {
   select,
   textarea {
     font-size: 16px;
+  }
+}
+
+/* Two rows of Overview counts before they would wrap unevenly */
+@media (max-width: 975px) {
+  .stat-grid {
+    grid-template-columns: repeat(2, 1fr);
   }
 }
 

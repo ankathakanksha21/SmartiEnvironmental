@@ -60,7 +60,7 @@ export default function Overview() {
 
       <h2>Staff workload</h2>
       {workload.length === 0 ? (
-        <p>No staff yet.</p>
+        <p>No active staff.</p>
       ) : (
         <div className="table-wrap">
           <table>

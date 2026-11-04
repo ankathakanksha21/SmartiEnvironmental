@@ -479,13 +479,37 @@ def test_moving_a_job_to_a_new_enquiry_customer_moves_that_customer(client, book
     assert onboarding_status(client, other_customer) == "In Progress"
 
 
-def test_a_refused_edit_does_not_move_the_customer(client, booking):
+def test_moving_a_job_to_an_active_customer_leaves_them_active(client, booking):
+    job = book_job(client, booking)
+    other_customer = add_customer(client, name="Bob Brown")
+    set_onboarding_status(client, other_customer, "Active")
+
+    client.put(f"/api/jobs/{job['id']}", json={**booking, "customer_id": other_customer})
+
+    assert onboarding_status(client, other_customer) == "Active"
+
+
+@pytest.mark.parametrize("status", ["New Enquiry", "Active"])
+def test_editing_a_job_leaves_a_status_set_by_hand_alone(client, booking, status):
+    job = book_job(client, booking)
+    set_onboarding_status(client, booking["customer_id"], status)
+
+    response = client.put(f"/api/jobs/{job['id']}", json={**booking, "description": "Changed"})
+
+    assert response.status_code == 200
+    assert onboarding_status(client, booking["customer_id"]) == status
+
+
+@pytest.mark.parametrize(
+    "changes", [{"description": ""}, {"scheduled_at": in_days(-1)}, {"staff_id": 999}]
+)
+def test_a_refused_edit_does_not_move_the_customer(client, booking, changes):
     job = book_job(client, booking)
     other_customer = add_customer(client, name="Bob Brown")
 
     response = client.put(
         f"/api/jobs/{job['id']}",
-        json={**booking, "customer_id": other_customer, "description": ""},
+        json={**booking, "customer_id": other_customer, **changes},
     )
 
     assert response.status_code == 422
@@ -501,6 +525,15 @@ def test_completing_a_job_makes_the_customer_active(client, booking):
     assert onboarding_status(client, booking["customer_id"]) == "Active"
 
 
+def test_completing_a_job_makes_a_new_enquiry_customer_active(client, booking):
+    job = book_job(client, booking)
+    set_onboarding_status(client, booking["customer_id"], "New Enquiry")
+
+    client.patch(f"/api/jobs/{job['id']}/status", json={"status": "Completed"})
+
+    assert onboarding_status(client, booking["customer_id"]) == "Active"
+
+
 @pytest.mark.parametrize("status", ["Pending", "In Progress"])
 def test_other_job_statuses_do_not_make_the_customer_active(client, booking, status):
     job = book_job(client, booking)
@@ -510,13 +543,14 @@ def test_other_job_statuses_do_not_make_the_customer_active(client, booking, sta
     assert onboarding_status(client, booking["customer_id"]) == "In Progress"
 
 
-def test_a_refused_reopen_leaves_the_customer_and_job_alone(client, booking):
+def test_a_refused_reopen_leaves_the_customer_active(client, booking):
     first = book_job(client, booking)
     client.patch(f"/api/jobs/{first['id']}/status", json={"status": "Completed"})
     book_job(client, booking)
 
-    client.patch(f"/api/jobs/{first['id']}/status", json={"status": "Pending"})
+    response = client.patch(f"/api/jobs/{first['id']}/status", json={"status": "Pending"})
 
+    assert response.status_code == 409
     assert onboarding_status(client, booking["customer_id"]) == "Active"
 
 
@@ -527,11 +561,3 @@ def test_reopening_a_completed_job_leaves_the_customer_active(client, booking):
     client.patch(f"/api/jobs/{job['id']}/status", json={"status": "In Progress"})
 
     assert onboarding_status(client, booking["customer_id"]) == "Active"
-
-
-def test_onboarding_status_can_still_be_changed_by_hand(client, booking):
-    book_job(client, booking)
-
-    set_onboarding_status(client, booking["customer_id"], "New Enquiry")
-
-    assert onboarding_status(client, booking["customer_id"]) == "New Enquiry"

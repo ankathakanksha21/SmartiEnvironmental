@@ -1,22 +1,21 @@
-import { useEffect } from 'react'
-import { Link, NavLink, Outlet, useLocation, useNavigate } from 'react-router'
+import { useEffect, useState } from 'react'
+import { Link, NavLink, Outlet } from 'react-router'
 
 const MESSAGE_SECONDS = 5
 
 // The header shown on every page. The current page appears in <Outlet />.
 export default function Layout() {
-  const location = useLocation()
-  const navigate = useNavigate()
-  const message = location.state?.message
-  const here = location.pathname + location.search
+  const [message, setMessage] = useState(null)
 
-  // A page shows a success message by navigating with { state: { message } }.
-  // This clears it after a few seconds, so reloading the page doesn't bring it back.
+  // Pages get this through useOutletContext. Each call makes a new object, so a
+  // second message restarts the timer even if its text is the same.
+  const showMessage = (text) => setMessage({ text })
+
   useEffect(() => {
     if (!message) return undefined
-    const timer = setTimeout(() => navigate(here, { replace: true }), MESSAGE_SECONDS * 1000)
+    const timer = setTimeout(() => setMessage(null), MESSAGE_SECONDS * 1000)
     return () => clearTimeout(timer)
-  }, [location.key, message, here, navigate])
+  }, [message])
 
   return (
     <>
@@ -36,13 +35,10 @@ export default function Layout() {
         </div>
       </header>
       <main className="container">
-        {message && (
-          <div className="success-box" role="status">
-            {message}
-          </div>
-        )}
-        <Outlet />
+        <Outlet context={showMessage} />
       </main>
+      {/* Screen readers announce changes inside this, so it stays on the page. */}
+      <div role="status">{message && <div className="success-box">{message.text}</div>}</div>
     </>
   )
 }

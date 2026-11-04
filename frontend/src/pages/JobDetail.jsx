@@ -1,7 +1,7 @@
-import { Link, useNavigate, useParams } from 'react-router'
+import { Link, useOutletContext, useParams } from 'react-router'
 import { request, useApi } from '../api.js'
+import CustomerNextStep from '../components/CustomerNextStep.jsx'
 import ErrorMessage from '../components/ErrorMessage.jsx'
-import NextStep from '../components/NextStep.jsx'
 import StatusBadge from '../components/StatusBadge.jsx'
 import StatusForm from '../components/StatusForm.jsx'
 import { JOB_STATUSES } from '../constants.js'
@@ -9,7 +9,7 @@ import { formatDateTime } from '../formatDateTime.js'
 
 export default function JobDetail() {
   const { id } = useParams()
-  const navigate = useNavigate()
+  const showMessage = useOutletContext()
   const { data: job, error, loading, reload } = useApi(`/jobs/${id}`)
 
   if (loading) return <p>Loading...</p>
@@ -18,7 +18,7 @@ export default function JobDetail() {
   async function saveStatus(status) {
     await request(`/jobs/${id}/status`, { method: 'PATCH', body: { status } })
     reload()
-    navigate('.', { replace: true, state: { message: 'Job status updated.' } })
+    showMessage('Job status updated.')
   }
 
   return (
@@ -30,11 +30,7 @@ export default function JobDetail() {
         </Link>
       </div>
 
-      {job.status === 'Completed' && (
-        <NextStep to={`/jobs/new?customer_id=${job.customer.id}&description=Maintenance visit`}>
-          Book a follow-up maintenance visit
-        </NextStep>
-      )}
+      {job.status === 'Completed' && <CustomerNextStep customerId={job.customer.id} />}
 
       <dl className="details">
         <dt>Date and time</dt>
@@ -45,8 +41,8 @@ export default function JobDetail() {
         <dd className="keep-line-breaks">{job.description}</dd>
         <dt>Customer</dt>
         <dd>
-          <Link to={`/customers/${job.customer.id}`}>{job.customer.name}</Link>{' '}
-          <StatusBadge status={job.customer.onboarding_status} />
+          <Link to={`/customers/${job.customer.id}`}>{job.customer.name}</Link>
+          <div className="muted">Onboarding status: {job.customer.onboarding_status}</div>
           <div className="muted">{job.customer.phone}</div>
           <div className="muted keep-line-breaks">{job.customer.address}</div>
         </dd>
