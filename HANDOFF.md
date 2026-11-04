@@ -4,10 +4,11 @@ Give a fresh session this file and the code, and it can continue without anythin
 
 ## 1. Current status
 
-- **Step we're in:** the 7 planned steps are done. The owner then asked for a design-only change, which is on the `ui-design` branch.
-- **On main:** all of brief sections A to D, the sample data and the final README.
-- **Open PR:** [#8](https://github.com/ankathakanksha21/SmartiEnvironmental/pull/8), `ui-design`, waiting for the owner to merge it.
-- **Next:** after that merge, run `npm install` in `frontend` and restart `npm run dev`, because the change adds a font package. New work starts only if the owner asks.
+- **Step we're in:** finished. The 7 planned steps and the design refresh the owner asked for afterwards are all done.
+- **On main:** all of brief sections A to D, the sample data, the final README and the Smarti-branded design.
+- **Open PR:** none.
+- **Next:** the owner tries the app, gives the assessor access to the private repo, and presents the work. New work starts only if the owner asks.
+- **Optional idea, not started:** the sample data uses generic wording such as "Fit the new unit". It could use Smarti's real product wording, such as waterless valves. The owner hasn't asked for this.
 
 ### Plan
 
@@ -345,7 +346,7 @@ The owner chose an ORM and asked how the folders and code were planned. Claude p
 
 **After the plan, `ui-design`.** The owner tried the app, asked how to test it by hand, and added their own test customer. They then asked for a design refresh with the same functionality: colours, font, sizes, spacing, cards instead of boxes, and green underlining, which Claude misread as something to remove. Claude restyled the app on the `ui-design` branch, using a scratch copy for any test that writes data, so the owner's data stayed untouched. Two independent reviewers checked the look, accessibility and behaviour, and Claude fixed what they found (section 7), then raised the PR.
 
-The owner then shared two screenshots of smartilimited.com and asked whether Claude had considered them. Claude said it hadn't: no images had come through, and it had also misread "green underlining" as something to remove. The owner's business is now clear from that site: Smarti Environmental makes waterless urinal valves, and its customers get installation and maintenance. Claude read the brand's fonts and colours from the live site and redid the design to match.
+The owner then shared two screenshots of smartilimited.com and asked whether Claude had considered them. Claude said it hadn't: no images had come through, and it had also misread "green underlining" as something to remove. The owner's business is now clear from that site: Smarti Environmental makes waterless urinal valves, and its customers get installation and maintenance. Claude read the brand's fonts and colours from the live site and redid the design to match. Reviewers measured it against the owner's images, Claude fixed what they found, and the owner merged the PR.
 
 ## 10. How to continue
 
