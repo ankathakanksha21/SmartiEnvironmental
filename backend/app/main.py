@@ -2,11 +2,9 @@
 
 from contextlib import asynccontextmanager
 
-from fastapi import Depends, FastAPI
+from fastapi import FastAPI
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
-from sqlalchemy import text
-from sqlalchemy.orm import Session
 
 from app import database, models
 from app.routes import customers
@@ -46,11 +44,3 @@ def unexpected_error(request, exc):
     return JSONResponse(
         status_code=500, content={"detail": "Something went wrong on the server."}
     )
-
-
-@app.get("/api/health")
-def health(db: Session = Depends(database.get_db)):
-    """Check that the backend is running and can reach the database."""
-    # This reads the file, so a corrupt database fails here. "SELECT 1" wouldn't.
-    db.execute(text("SELECT count(*) FROM sqlite_master"))
-    return {"status": "ok"}

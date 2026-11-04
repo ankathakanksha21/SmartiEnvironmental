@@ -31,6 +31,8 @@ def create_customer(new_customer: CustomerCreate, db: Session = Depends(get_db))
     return customer
 
 
+# ":int" makes a non-numeric id a 404. Without it FastAPI returns a 422,
+# and the page would ask the user to fix a form it doesn't have.
 @router.get("/{customer_id:int}", response_model=CustomerOut)
 def get_customer(customer_id: int, db: Session = Depends(get_db)):
     return find_customer(db, customer_id)

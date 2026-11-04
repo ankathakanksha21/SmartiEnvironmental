@@ -56,7 +56,7 @@ class CustomerCreate(CustomerDetails):
     onboarding_status: OnboardingStatus = "New Enquiry"
 
 
-class CustomerStatusUpdate(RequestBody):
+class CustomerStatusUpdate(BaseModel):
     onboarding_status: OnboardingStatus
 
 

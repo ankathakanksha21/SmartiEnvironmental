@@ -7,8 +7,8 @@ Give a fresh session this file and the code, and it can continue without anythin
 - **Step we're in:** 4 of 7, building. `customers` is the second of four branches.
 - **On main:** the design and the running skeleton from `project-setup`.
 - **Working branch:** `customers`.
-- **Open PR:** none yet.
-- **Next:** review `customers`, raise its PR, and start `staff` after the owner merges it.
+- **Open PR:** [#3](https://github.com/ankathakanksha21/SmartiEnvironmental/pull/3), `customers`, waiting for the owner to merge it.
+- **Next:** after that merge, `staff` starts from an up-to-date main.
 - **Deadline:** finish today, 4 November 2026.
 
 ### Plan
@@ -39,7 +39,7 @@ A simple web CRM for a business that manages customers, appointments, fitters an
 | D. Assign jobs to individual staff members | not started |
 | D. Track job statuses (Pending, In Progress, Completed) | not started |
 | Basic, usable interface | started |
-| Shows data being created, stored, retrieved and updated | not started |
+| Shows data being created, stored, retrieved and updated | started |
 | Logical, maintainable code structure | started |
 | Input validation and basic error handling | started |
 | Git version control | started |
@@ -108,7 +108,8 @@ Everything in brief sections A to D gets built, with no extras. Main works after
 | Code layers | Routes plus service and repository layers, or routes that call the models | Routes call the models directly | Three tables don't need extra layers, and ORM calls are short. |
 | Frontend | Jinja2 pages from the server, or React | React with Vite, plain JavaScript, `react-router` for page URLs, one CSS file | The owner chose React. The split also shows clearly how the parts interact. The costs are that every developer needs Node.js, running it takes two terminals, and there's more frontend code. A minimal setup measured 24 npm packages and 62 MB. |
 | How the two talk | Allow cross-origin requests (CORS), or a Vite proxy | Vite proxy | Vite's dev server forwards `/api` calls to FastAPI, so the backend needs no CORS setup. |
-| Validation | Plain functions, or Pydantic models | Pydantic models with our own messages, plus checks in the route for rules that need the database | FastAPI runs the models before the route. A small handler turns failures into `{field: message}` for the forms. Pydantic's default wording, such as "String should have at least 1 character", gets replaced. |
+| Validation | Plain functions, or Pydantic models | Pydantic models with our own messages, plus checks in the route for rules that need the database | FastAPI runs the models before the route. A small handler turns failures into `{field: message}` for the forms. Our own messages replace Pydantic's wording for required text, phone and email. A bad status or a missing field keeps Pydantic's wording, because the forms can't send those. |
+| Where allowed statuses are enforced | `schemas.py` only, or a database CHECK constraint as well | `schemas.py` only | The API is the only way in, so a constraint would add another copy of each list. SQLite also can't change a constraint without rebuilding the table, so adding a status would mean deleting `crm.db`. |
 | Customer fields | Split or single address, required or optional email | Name, phone and address required, email optional, address in one box | Nothing in the brief needs city or postcode on their own. Staff need a phone number and an address to do a job, but some customers have no email. |
 | Date and time | Two columns, or one | One `scheduled_at` DateTime column | One value is simpler to sort and compare. A `datetime-local` input sends one value, Pydantic turns it into a Python datetime, and SQLAlchemy stores it. |
 | Job type | A column, or read it from the staff role | No column | The assigned person's role already says fitting or maintenance, and two copies could disagree. |
@@ -160,7 +161,6 @@ A page calls `api.js`, which calls a FastAPI route. FastAPI validates the reques
 **Backend pieces from `project-setup`**
 - `database.py` builds the database path from its own location, opens one session per request, and turns on foreign keys for each connection. With `CRM_ECHO_SQL=1` it prints the SQL. We kept this because the ORM hides the SQL, and the brief asks to show how data is stored.
 - `main.py` creates missing tables at startup, so there is no database setup step. It also turns validation failures into `{"errors": {field: message}}`, treats an oversized id as not found, and returns unexpected errors as a JSON message.
-- `GET /api/health` reads the database file, so it fails if the file is corrupt or can't be opened.
 
 **Frontend pieces from `project-setup`**
 - `api.js` holds `request()`, which makes every call and turns failures into an `ApiError`, and `useApi()`, which loads data for a page.
@@ -180,7 +180,8 @@ A page calls `api.js`, which calls a FastAPI route. FastAPI validates the reques
 - Validation rules are small functions such as `required` and `valid_phone`. `Annotated` attaches them to a type (`RequiredText`, `Phone`), and each class lists its fields using those types.
 - Pages: `CustomerList`, `CustomerDetail`, `CustomerNew`, `CustomerEdit`. The last two share `CustomerForm`, and `useForm` holds its state.
 - `StatusForm` and `StatusBadge` are shared, because jobs have a status too.
-- Adding a status means editing three places: `models.py`, `schemas.py` and `constants.js`. An existing `crm.db` also needs deleting, because there is no migration tool.
+- Adding a status means editing three places: `schemas.py`, `constants.js`, and `style.css` for its badge colour.
+- `useApi` reports `loading` until the answer for the current URL arrives. Pages remove their forms while loading, so a form can't save one record's values over another.
 
 **One request traced: adding a customer**
 1. `CustomerNew.jsx` calls `request('/customers', { method: 'POST', body: values })` when the form is submitted.
@@ -195,6 +196,11 @@ A page calls `api.js`, which calls a FastAPI route. FastAPI validates the reques
 **The design comparison stalled.** The planned comparison had three stages: prototypes, three independent designs, then critics. The prototype step stopped making progress at 17:08, and Claude didn't notice until the owner asked for status at 18:25. The cause is unknown. Claude stopped the run, used the evidence already on disk, and wrote the design directly. The independent designs and critics never ran, so each PR gets a review instead. This cost about 75 minutes.
 
 **The API stopped working in the browser after a branch switch.** Pages said "Something went wrong" and `/api/customers` through Vite returned HTML, although the backend answered correctly on its own. Vite's log showed `git checkout` had rewritten `vite.config.js`, and the automatic restart that followed lost the proxy. Restarting `npm run dev` fixed it, and the README now says so.
+
+**Problems the `customers` review found**
+- Data loss: jumping through browser history between two edit pages left the first customer's values in the form, and saving overwrote the second customer with them. `useApi` now goes back to loading when the URL changes.
+- Tests that proved less than they looked. All 36 still passed with the phone character rule deleted, and with the 7 and 15 digit limits changed. We added cases for each one, plus clearing an email.
+- A database CHECK constraint gave each status list another copy, and the health route lost its only caller. We removed both.
 
 **Problems the `project-setup` review found**
 - The README said Node.js 20.19, but `react-router` needs 22.22 or newer. Fixed.
@@ -217,7 +223,7 @@ A page calls `api.js`, which calls a FastAPI route. FastAPI validates the reques
 **How to test:** follow [README.md](README.md). Run `pytest` in `backend`, and `npm run lint` and `npm run build` in `frontend`.
 
 **Latest results, on `customers`**
-- `pytest`: 36 passed on Python 3.11. These cover the validation and oversized-id handlers that had no tests before.
+- `pytest`: 38 passed on Python 3.11. These cover the validation and oversized-id handlers that had no tests before.
 - `npm run lint` is clean, and `npm run build` succeeds.
 - The frontend has no automated tests. Its pages get checked in the browser.
 
@@ -228,7 +234,9 @@ A page calls `api.js`, which calls a FastAPI route. FastAPI validates the reques
 - A status update changed the badge and was still there after a reload.
 - An edit changed the name and cleared the email, and the status stayed the same.
 - The list showed the customer, and `/customers/999` showed "Customer not found."
-- With the Browser pane not drawing, clicks failed, so the blank-name edit and the later save were triggered from JavaScript on the real buttons.
+- An edit with a blank name showed "Name is required."
+- The Browser pane in the Claude desktop app was hidden, so clicks failed for the last steps. Saving the blank-name edit, saving the edit after it, and the history check below ran by calling `click()` and `history.go()` from JavaScript on the real page.
+- After the `useApi` fix, a history jump from one customer's edit page to another's showed the right customer's values.
 
 **Earlier, on `project-setup`:** an unknown page URL showed "Page not found", `/docs` listed the API, and with the backend stopped the page showed "Something went wrong. Check the backend is running, then try again."
 
@@ -263,7 +271,7 @@ The owner chose an ORM and asked how the folders and code were planned. Claude p
 
 **Step 4, `project-setup`.** The owner merged the `design` PR. Claude deleted the merged `design` branch from GitHub without being asked, told the owner, and restored it. Claude then built the running skeleton: FastAPI, the SQLite connection, error handling, tests, and the React shell. Two independent reviewers checked it, and Claude fixed what they found (section 7). The owner asked what's pending on their side, how testing works, and what `pytest` is, and Claude explained. The owner merged the PR.
 
-**Step 4, `customers`.** Claude built the customer API, validation rules and 30 more tests, then the React pages, and checked each flow in the browser.
+**Step 4, `customers`.** Claude built the customer API, validation rules and tests, then the React pages, and checked each flow in the browser. Two independent reviewers found a data-loss bug and some weak tests, and Claude fixed them (section 7).
 
 ## 10. How to continue
 
@@ -288,3 +296,4 @@ The owner chose an ORM and asked how the folders and code were planned. Claude p
 - `.claude/launch.json` holds Claude's commands for starting the servers. It stays out of git through `.git/info/exclude`.
 - When the Browser pane in the Claude desktop app is hidden, screenshots fail but reading page text works.
 - The owner has no automated checks on GitHub, so a PR shows no CI results. Tests run locally.
+- Known limitation for the final README: name sorting ignores case for English letters only, because SQLite's `lower()` handles ASCII alone. Accented names sort after Z.

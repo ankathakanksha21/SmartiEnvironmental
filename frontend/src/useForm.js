@@ -9,8 +9,8 @@ export function useForm(initialValues, save) {
   const [saving, setSaving] = useState(false)
 
   function change(event) {
-    const { name, type, checked, value } = event.target
-    setValues({ ...values, [name]: type === 'checkbox' ? checked : value })
+    const { name, value } = event.target
+    setValues({ ...values, [name]: value })
   }
 
   async function submit(event) {

@@ -1,11 +1,6 @@
 """Tests for brief sections A (customer management) and B (onboarding)."""
 
 import pytest
-from sqlalchemy.exc import IntegrityError
-from sqlalchemy.orm import Session
-
-from app import database
-from app.models import Customer
 
 VALID_CUSTOMER = {
     "name": "Anna Lee",
@@ -48,16 +43,22 @@ def test_add_customer_removes_spaces_around_values(client):
     assert created["name"] == "Anna Lee"
 
 
+@pytest.mark.parametrize("phone", ["1234567", "123456789012345", "+44 (0)113-496 0000"])
+def test_add_customer_accepts_valid_phone_numbers(client, phone):
+    assert add_customer(client, phone=phone)["phone"] == phone
+
+
 @pytest.mark.parametrize(
     "field, value, message",
     [
         ("name", "", "Name is required."),
         ("name", "   ", "Name is required."),
         ("phone", "", "Phone is required."),
-        ("phone", "not a number", "Enter a valid phone number."),
-        ("phone", "12345", "Enter a valid phone number."),
+        ("phone", "12a34567", "Enter a valid phone number."),
+        ("phone", "123456", "Enter a valid phone number."),
         ("phone", "1234567890123456", "Enter a valid phone number."),
         ("email", "not-an-email", "Enter a valid email address."),
+        ("email", "a@b", "Enter a valid email address."),
         ("address", "", "Address is required."),
         ("onboarding_status", "Unknown", "Input should be 'New Enquiry', 'In Progress' or 'Active'"),
     ],
@@ -127,6 +128,15 @@ def test_edit_customer_changes_the_details_and_keeps_the_status(client):
     assert stored == {**changes, "id": created["id"], "onboarding_status": "Active"}
 
 
+def test_edit_customer_can_clear_the_email(client):
+    created = add_customer(client)
+
+    response = client.put(f"/api/customers/{created['id']}", json={**VALID_CUSTOMER, "email": ""})
+
+    assert response.status_code == 200
+    assert client.get(f"/api/customers/{created['id']}").json()["email"] == ""
+
+
 def test_edit_customer_rejects_invalid_input_and_changes_nothing(client):
     created = add_customer(client)
 
@@ -180,13 +190,3 @@ def test_update_onboarding_status_of_unknown_customer_returns_404(client):
     response = client.patch("/api/customers/999/status", json={"onboarding_status": "Active"})
 
     assert response.status_code == 404
-
-
-def test_database_refuses_an_unknown_status_even_without_the_api(client):
-    # This test doesn't call the API. It needs the client fixture for the empty test database.
-    customer = Customer(**VALID_CUSTOMER, onboarding_status="Unknown")
-
-    with Session(database.engine) as session:
-        session.add(customer)
-        with pytest.raises(IntegrityError):
-            session.commit()
