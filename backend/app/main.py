@@ -40,7 +40,7 @@ def id_too_large(request, exc):
 
 @app.exception_handler(Exception)
 def unexpected_error(request, exc):
-    """Hide the details from the browser. The traceback still goes to the terminal."""
+    """Answer in JSON so the page can show the message. The traceback still goes to the terminal."""
     return JSONResponse(
         status_code=500, content={"detail": "Something went wrong on the server."}
     )
@@ -49,5 +49,6 @@ def unexpected_error(request, exc):
 @app.get("/api/health")
 def health(db: Session = Depends(database.get_db)):
     """Check that the backend is running and can reach the database."""
-    db.execute(text("SELECT 1"))
+    # This reads the file, so a corrupt database fails here. "SELECT 1" wouldn't.
+    db.execute(text("SELECT count(*) FROM sqlite_master"))
     return {"status": "ok"}

@@ -4,7 +4,7 @@ A simple web-based CRM for managing customers, appointments, fitters and mainten
 
 ## Getting started
 
-You need Python 3.11 or newer and Node.js 20.19 or newer. There is no database to install, because SQLite comes with Python. The app creates its database file, `backend/crm.db`, the first time it starts.
+You need Python 3.11 or newer and Node.js 22.22 or newer. There is no database to install, because SQLite comes with Python. The app creates its database file, `backend/crm.db`, the first time it starts.
 
 ### 1. Start the backend
 
@@ -13,26 +13,26 @@ cd backend
 python -m venv .venv
 ```
 
-Activate the virtual environment.
+On macOS or Linux, use `python3` if `python` isn't found.
 
-On Windows:
+Activate the virtual environment:
 
-```bash
-.venv\Scripts\activate
-```
+| Terminal | Command |
+|---|---|
+| Windows Command Prompt or PowerShell | `.venv\Scripts\activate` |
+| Git Bash | `source .venv/Scripts/activate` |
+| macOS or Linux | `source .venv/bin/activate` |
 
-On macOS or Linux:
-
-```bash
-source .venv/bin/activate
-```
+If PowerShell refuses to run the script, use Command Prompt instead.
 
 Install the packages and start the server. Leave this terminal running.
 
 ```bash
 pip install -r requirements.txt
-uvicorn app.main:app --reload
+uvicorn app.main:app --reload --reload-dir app
 ```
+
+The server restarts when the code changes. `--reload-dir app` stops it scanning the thousands of files in `.venv`.
 
 The API now runs at http://localhost:8000. You can try every API call from your browser at http://localhost:8000/docs.
 

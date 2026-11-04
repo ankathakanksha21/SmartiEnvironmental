@@ -38,12 +38,12 @@ A simple web CRM for a business that manages customers, appointments, fitters an
 | D. Maintain a list of fitters and maintenance engineers | not started |
 | D. Assign jobs to individual staff members | not started |
 | D. Track job statuses (Pending, In Progress, Completed) | not started |
-| Basic, usable interface | not started |
+| Basic, usable interface | started |
 | Shows data being created, stored, retrieved and updated | not started |
-| Logical, maintainable code structure | not started |
-| Input validation and basic error handling | not started |
+| Logical, maintainable code structure | started |
+| Input validation and basic error handling | started |
 | Git version control | started |
-| README: install, set up database or test data, run locally, test main functionality | not started |
+| README: install, set up database or test data, run locally, test main functionality | started |
 | README: technologies and why, app and database structure, how components interact, alternatives, what would change with more time | not started |
 | README: build order, challenges and fixes, limitations, how it was tested | not started |
 | README: explains the feature prioritisation | not started |
@@ -121,7 +121,7 @@ Everything in brief sections A to D gets built, with no extras. Main works after
 
 ## 6. Code guide
 
-This is the layout. `project-setup` has added everything except the table classes, schemas, seed data, feature routes and feature pages, which arrive with their feature branches.
+This is the full layout. These parts arrive with their feature branches: table classes, `schemas.py`, `seed.py`, `routes/`, `constants.js`, feature pages, and the shared form fields and jobs table.
 
 ```
 backend/
@@ -132,7 +132,7 @@ backend/
     schemas.py     request and response shapes, validation rules
     seed.py        sample data
     routes/        one file per feature: customers, staff, jobs
-  tests/           pytest, one file per feature
+  tests/           pytest, one file per feature, plus test_app.py for shared parts
 frontend/
   src/
     main.jsx       starts React and defines the page URLs
@@ -157,9 +157,9 @@ A page calls `api.js`, which calls a FastAPI route. FastAPI validates the reques
 - `jobs`: id, customer_id, staff_id, description, scheduled_at, status
 
 **Backend pieces from `project-setup`**
-- `database.py` builds the database path from its own location, opens one session per request, turns on foreign keys for each connection, and prints the SQL when `CRM_ECHO_SQL=1`.
-- `main.py` creates missing tables at startup, so there is no database setup step. It also turns validation failures into `{"errors": {field: message}}`, treats an oversized id as not found, and hides unexpected errors from the browser.
-- `GET /api/health` checks the backend can reach the database.
+- `database.py` builds the database path from its own location, opens one session per request, and turns on foreign keys for each connection. With `CRM_ECHO_SQL=1` it prints the SQL. We kept this because the ORM hides the SQL, and the brief asks to show how data is stored.
+- `main.py` creates missing tables at startup, so there is no database setup step. It also turns validation failures into `{"errors": {field: message}}`, treats an oversized id as not found, and returns unexpected errors as a JSON message.
+- `GET /api/health` reads the database file, so it fails if the file is corrupt or can't be opened.
 
 **Frontend pieces from `project-setup`**
 - `api.js` holds `request()`, which makes every call and turns failures into an `ApiError`, and `useApi()`, which loads data for a page.
@@ -169,6 +169,12 @@ A page calls `api.js`, which calls a FastAPI route. FastAPI validates the reques
 ## 7. Challenges
 
 **The design comparison stalled.** The planned comparison had three stages: prototypes, three independent designs, then critics. The prototype step stopped making progress at 17:08, and Claude didn't notice until the owner asked for status at 18:25. The cause is unknown. Claude stopped the run, used the evidence already on disk, and wrote the design directly. The independent designs and critics never ran, so each PR gets a review instead. This cost about 75 minutes.
+
+**Problems the `project-setup` review found**
+- The README said Node.js 20.19, but `react-router` needs 22.22 or newer. Fixed.
+- `uvicorn --reload` scanned every file in `.venv` and used 63.6% of a CPU core. `--reload-dir app` cut that to 1.2%.
+- Some tests passed even with the code they covered removed. The health test, for example, still passed with the database call deleted. We rewrote them to prove what they claim.
+- The first version had pieces nothing used yet, such as `useApi`'s reload and some CSS. We removed them, and each comes back with the branch that needs it.
 
 **Problems the prototypes found, and how the design avoids them**
 - FastAPI can run a sync route and its database dependency on different threads, and `sqlite3` rejects that by default. Without `check_same_thread=False`, 179 of 300 requests failed with only 2 at a time. SQLAlchemy sets this itself for SQLite files, so we don't have to.
@@ -185,8 +191,9 @@ A page calls `api.js`, which calls a FastAPI route. FastAPI validates the reques
 **How to test:** follow [README.md](README.md). Run `pytest` in `backend`, and `npm run lint` and `npm run build` in `frontend`.
 
 **Latest results, on `project-setup`**
-- `pytest`: 5 passed on Python 3.11.
+- `pytest`: 6 passed on Python 3.11.
 - `npm run lint` is clean, and `npm run build` succeeds.
+- The validation and oversized-id handlers have no tests yet, because no route uses them. The `customers` tests cover them.
 - In the browser, the home page showed "Backend status: ok", so React reached FastAPI and the database through the proxy.
 - An unknown page URL showed "Page not found", and `/docs` listed the API.
 - With the backend stopped, the page showed "Something went wrong. Check the backend is running, then try again."
@@ -220,7 +227,7 @@ The owner confirmed FastAPI and SQLite and chose React for the frontend. They as
 
 The owner chose an ORM and asked how the folders and code were planned. Claude picked SQLAlchemy, dropped the planned `queries/` folder and `schema.sql` because the models now hold the tables, explained the layout (section 6), and raised the `design` PR.
 
-**Step 4, `project-setup`.** The owner merged the `design` PR. Claude deleted the merged `design` branch from GitHub without being asked, told the owner, and restored it. Claude then built the running skeleton: FastAPI, the SQLite connection, error handling, tests, and the React shell.
+**Step 4, `project-setup`.** The owner merged the `design` PR. Claude deleted the merged `design` branch from GitHub without being asked, told the owner, and restored it. Claude then built the running skeleton: FastAPI, the SQLite connection, error handling, tests, and the React shell. Two independent reviewers checked it, and Claude fixed what they found (section 7). The owner asked what's pending on their side, how testing works, and what `pytest` is, and Claude explained.
 
 ## 10. How to continue
 
@@ -241,6 +248,7 @@ The owner chose an ORM and asked how the folders and code were planned. Claude p
 
 - Repo: https://github.com/ankathakanksha21/SmartiEnvironmental (private).
 - Machine: Windows 11, with Python 3.11.4 as `python`, Python 3.12.10 through `py`, Node.js 24.20 and npm 11.19.
-- The owner started this work with no memory of earlier sessions, so this file is the only record of past decisions.
+- Claude has no memory of earlier sessions on this work, so this file is the only record of past decisions.
 - `.claude/launch.json` holds Claude's commands for starting the servers. It stays out of git through `.git/info/exclude`.
-- When the app's Browser pane is hidden, screenshots fail but reading page text works.
+- When the Browser pane in the Claude desktop app is hidden, screenshots fail but reading page text works.
+- The owner has no automated checks on GitHub, so a PR shows no CI results. Tests run locally.

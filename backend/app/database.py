@@ -9,7 +9,7 @@ from sqlalchemy.pool import NullPool
 
 # Built from this file's location, so the app opens the same database
 # whichever folder it starts from.
-DEFAULT_DATABASE = Path(__file__).resolve().parent.parent / "crm.db"
+DATABASE_PATH = Path(__file__).resolve().parent.parent / "crm.db"
 
 
 def make_engine(path):
@@ -18,7 +18,7 @@ def make_engine(path):
         # Close each connection after use. A pool would keep the file open,
         # and Windows then can't delete a test database.
         poolclass=NullPool,
-        # Run with CRM_ECHO_SQL=1 to print every SQL statement in the terminal.
+        # The ORM writes the SQL for us. Run with CRM_ECHO_SQL=1 to see it in the terminal.
         echo=os.environ.get("CRM_ECHO_SQL") == "1",
     )
 
@@ -30,7 +30,7 @@ def make_engine(path):
     return engine
 
 
-engine = make_engine(os.environ.get("CRM_DB", DEFAULT_DATABASE))
+engine = make_engine(DATABASE_PATH)
 
 
 def get_db():

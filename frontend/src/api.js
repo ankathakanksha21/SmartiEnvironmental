@@ -1,6 +1,6 @@
 // Every call to the backend goes through this file.
 
-import { useCallback, useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 
 export class ApiError extends Error {
   constructor(status, message, fieldErrors = {}) {
@@ -11,6 +11,7 @@ export class ApiError extends Error {
 }
 
 const SERVER_PROBLEM = 'Something went wrong. Check the backend is running, then try again.'
+const INVALID_INPUT = 'Please fix the errors and try again.'
 
 export async function request(path, { method = 'GET', body } = {}) {
   let response
@@ -24,39 +25,30 @@ export async function request(path, { method = 'GET', body } = {}) {
     throw new ApiError(0, SERVER_PROBLEM)
   }
 
-  // A proxy error has no JSON body, so a failed parse counts as no data.
+  // Every answer from our API is JSON. Anything else, such as a proxy error, counts as a failure.
   const data = await response.json().catch(() => null)
-  if (!response.ok) {
-    throw new ApiError(response.status, data?.detail ?? SERVER_PROBLEM, data?.errors)
+  if (!response.ok || data === null) {
+    const message = data?.detail ?? (data?.errors ? INVALID_INPUT : SERVER_PROBLEM)
+    throw new ApiError(response.status, message, data?.errors)
   }
   return data
 }
 
-// Loads data for a page. Call reload() to fetch it again after a change.
+// Loads data for a page.
 export function useApi(path) {
-  const [result, setResult] = useState({ path: null, data: null, error: null })
-  const [reloads, setReloads] = useState(0)
+  const [result, setResult] = useState({ data: null, error: null, loading: true })
 
   useEffect(() => {
-    // If the page moves on before this answer arrives, ignore the answer.
+    // If the page closes before this answer arrives, ignore the answer.
     let ignore = false
     request(path).then(
-      (data) => !ignore && setResult({ path, data, error: null }),
-      (error) => !ignore && setResult({ path, data: null, error }),
+      (data) => !ignore && setResult({ data, error: null, loading: false }),
+      (error) => !ignore && setResult({ data: null, error, loading: false }),
     )
     return () => {
       ignore = true
     }
-  }, [path, reloads])
+  }, [path])
 
-  const reload = useCallback(() => setReloads((count) => count + 1), [])
-
-  // Until the answer for this path arrives, the page is still loading.
-  const current = result.path === path
-  return {
-    data: current ? result.data : null,
-    error: current ? result.error : null,
-    loading: !current,
-    reload,
-  }
+  return result
 }
