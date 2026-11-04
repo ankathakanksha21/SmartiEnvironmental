@@ -4,7 +4,7 @@ import ErrorMessage from '../components/ErrorMessage.jsx'
 import JobsTable from '../components/JobsTable.jsx'
 import StatusBadge from '../components/StatusBadge.jsx'
 
-// The home page: what needs attention, and how busy each person is.
+// The home page. It shows what needs attention and how busy each person is.
 export default function Overview() {
   const customers = useApi('/customers')
   const jobs = useApi('/jobs')

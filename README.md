@@ -101,9 +101,9 @@ This follows one customer from enquiry to maintenance, using the sample data.
 
 1. Open **Overview**. It shows four counts, the next appointments and each person's open jobs. **New enquiries** counts Chloe Evans.
 2. Click **New enquiries**, then **Chloe Evans**. Their status is New Enquiry, and the **Next step** line says to book the first job.
-3. Click **Book the first job**. The form opens with Chloe selected. Choose a fitter, a future date and a description, and save. The job's page shows that Chloe is now In Progress.
+3. Click **Book the first job**. The form opens with Chloe selected. Choose a fitter, pick a date and time in the future, add a description and save. The job's page shows that Chloe is now In Progress.
 4. Choose **Completed** and click **Update status**. Chloe is now Active, and the **Next step** line offers a follow-up maintenance visit.
-5. Click it. The form opens with Chloe and a description filled in. Choose a maintenance engineer and a future date, and save.
+5. Click **Book a follow-up maintenance visit**. The form opens with Chloe and a description filled in. Choose a maintenance engineer, pick a date and time in the future and save.
 6. Click **Overview**. **New enquiries** has dropped by one, and the engineer has one more open job.
 
 **Customers**
@@ -218,7 +218,7 @@ The JSON response travels back along the same path. If the input is invalid, Fas
 
 ### How the steps connect
 
-A customer moves through one journey, and the app moves them along it.
+A customer's status follows their jobs, and the customer's page links to the next step.
 
 ```mermaid
 flowchart LR
@@ -304,7 +304,7 @@ Once the brief was met, I checked the app against how an office would use it. Th
 - success messages
 - links from job lists to the customer and staff member
 - onboarding that follows the jobs
-- a **Next step** line on the customer's page
+- a Next step line on the customer's page
 - a follow-up maintenance visit after a completed job
 
 I kept these small, so I left out a duplicate-customer check and a way to record the work done on a job, which would need a new column.

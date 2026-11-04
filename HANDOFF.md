@@ -4,11 +4,11 @@ Give a fresh session this file and the code, and it can continue without anythin
 
 ## 1. Current status
 
-- **Step we're in:** step 9, `connected-workflow`, waiting for the owner to merge.
-- **On main:** all of brief sections A to D, the sample data, the final README and the Smarti-branded design.
-- **On this branch:** six small additions that connect the steps into one journey (section 4).
+- **Step we're in:** Step 9, `connected-workflow`, waiting for the owner to merge.
+- **On main:** All of brief sections A to D, the sample data, the final README and the Smarti-branded design.
+- **On this branch:** Six small additions that connect the steps into one journey (section 4).
 - **Open PR:** #10, on `connected-workflow`.
-- **Next:** the owner merges the PR. Claude then checks main and corrects this status in a small follow-up PR, as with PR #7 and PR #9. After that, the owner tries the app, gives the assessor access to the private repo, and presents the work. New work starts only if the owner asks.
+- **Next:** The owner merges the PR. Claude then checks main and corrects this status in a small follow-up PR, as with PR #7 and PR #9. After that, the owner tries the app, gives the assessor access to the private repo, and presents the work. New work starts only if the owner asks.
 
 ### Plan
 
@@ -104,7 +104,7 @@ Everything in brief sections A to D got built, and main worked after every merge
 | 5 | `jobs` | API and pages for brief C and the rest of D | It needs both tables above and holds the most rules. |
 | 6 | `demo-and-docs` | Sample data, demo run, final README | The docs describe the finished app. |
 | 7 | `ui-design` | Smarti's colours, font and cards | The owner asked for it after trying the app. It changes no behaviour. |
-| 8 | `connected-workflow` | The six additions above | The owner asked for them after a cross-check. They build on every finished feature. |
+| 8 | `connected-workflow` | The six additions above | The owner approved them after a cross-check. They build on every finished feature. |
 
 **Left out on purpose**
 - Deleting records. The brief doesn't ask for it, and keeping records protects job history.
@@ -145,7 +145,7 @@ Everything in brief sections A to D got built, and main worked after every merge
 | Onboarding status | Only by hand, or following the jobs | Follows the jobs, and can still be set by hand | Booking takes New Enquiry to In Progress, and completing a job makes the customer Active. A separate manual step would let the status disagree with the jobs. |
 | When a job reopens | Move onboarding back, or leave it | Leave it | The office may have set the status by hand, and a reopened job may be a correction. The README lists this as a limitation. |
 | Next step | Store it, or work it out from the jobs | Worked out by one shared component from the customer's jobs, on the customer's page and on a completed job's page | A stored value could go stale, one component means the two pages can't disagree, and this needs no database change. |
-| Next step wording | "Visit" or "job" | "Book the first job" and "Complete the job on...", and "Book a follow-up maintenance visit" | "Job" matches the **Book a job** button and the job pages, so the two don't look like different things. "Maintenance visit" stays for the follow-up, because those are the owner's words. |
+| Next step wording | "Visit" or "job" | "Book the first job" and "Complete the job on...", and "Book a follow-up maintenance visit" | "Job" matches the **Book a job** button and the job pages, so the two don't look like different things. The follow-up stays a maintenance visit, the term the owner uses. |
 | Success messages | A toast library, React Router's location state, or React state in `Layout` | React state in `Layout`, shown for 5 seconds at the bottom of the screen | It needs no new package. Location state came first, and the review showed why it's wrong (section 7). A message may stay on screen for its 5 seconds after you move to another page, which does no harm. |
 | Follow-up visit | A job type, a link between jobs, or a filled-in form | A filled-in form, `/jobs/new?customer_id=1&description=...` | It needs no database change, and the office can change anything before saving. |
 | Customer's status on a job page | A badge beside the name, or a labelled line | A labelled line, "Onboarding status: In Progress" | The onboarding and job statuses share words such as In Progress, so an unlabelled badge read as the job's own status. |
@@ -227,7 +227,7 @@ Pages: `StaffList`, `StaffDetail`, `StaffNew`, `StaffEdit`. The last two share `
 - Each change saves in the same `db.commit()` as the job.
 
 **The connected pages**
-- `Overview.jsx` loads customers, all jobs, upcoming jobs and staff through the existing API calls and counts on the page. Staff workload lists active staff, plus anyone inactive who still has open jobs.
+- `Overview.jsx` loads customers, all jobs, upcoming jobs and staff through the existing API calls and works out the counts in the browser. Staff workload lists active staff, plus anyone inactive who still has open jobs.
 - `CustomerNextStep` reads the customer's jobs. With none, it offers the first job. With an open job, it links to the earliest one and says if it's overdue. With every job completed, it offers a follow-up maintenance visit.
 - `JobDetail.jsx` shows that line once the job is Completed, and shows the customer's onboarding status as a labelled line under their name.
 
@@ -287,7 +287,7 @@ Pages: `StaffList`, `StaffDetail`, `StaffNew`, `StaffEdit`. The last two share `
 | `demo-and-docs` | The README never said to clone the repo or reload after seeding, and left out the Overdue label | Added |
 | `demo-and-docs` | "By hand" overstated the page checks, which used scripted clicks | Reworded |
 | `connected-workflow` | Saving any job edit re-ran the onboarding rule and overwrote a status set by hand. Two reviewers found this separately, and no test covered it | The rule only runs when a job moves to another customer. Added tests |
-| `connected-workflow` | The success message lived in browser history, so a reload or Back showed it again. A slow save could pull you back to the page you'd left, and the timer could overwrite a click | Moved it into React state in `Layout` |
+| `connected-workflow` | The success message lived in browser history, so a reload or Back showed it again. A slow save could pull you back to the page you'd left, and the timer that cleared it could cancel a link click | Moved it into React state in `Layout` |
 | `connected-workflow` | On a phone, the message from a status save appeared off-screen. On desktop, the page jumped about 72px when it cleared | Fixed it to the bottom of the screen |
 | `connected-workflow` | A completed job's page offered a follow-up even when one was already booked, which contradicted the customer's page | Both pages now share `CustomerNextStep` |
 | `connected-workflow` | The onboarding badge on the job page read as the job's own status | A labelled line under the customer's name |
@@ -297,7 +297,7 @@ Pages: `StaffList`, `StaffDetail`, `StaffNew`, `StaffEdit`. The last two share `
 | `connected-workflow` | "Visit" and "job" named the same thing on one page, and the follow-up link was written in two files | One word and one component |
 | `connected-workflow` | The new CSS repeated the card and label rules, and some tests couldn't fail when their rule broke | Grouped the rules. Five more test cases, and two tests corrected |
 
-**Findings left alone on purpose, on `connected-workflow`.** Count labels stay plural beside a 1, because they name the metric. A customer's name in the jobs table on their own page still links there, which does no harm. The Next step line appears 40 to 70ms after the customer's details. Within 5 seconds of a successful save, a refused status change shows the green and red messages together, and both are true. A customer id typed into the booking URL by hand can show an odd error, as it did before this branch. The header wraps below 355px wide. Moving a job between customers is listed as a limitation in the README.
+**Findings left alone on purpose, on `connected-workflow`.** Count labels stay plural beside a 1, because they name the metric. A customer's name in the jobs table on their own page still links there, which does no harm. The Next step line appears 40 to 70ms after the customer's details. Within 5 seconds of a successful save, a refused status change shows the green and red messages together, and both are true. A customer id typed into the booking URL by hand can show a raw error, such as "Input should be a valid integer", as it did before this branch. The header wraps below 355px wide. Moving a job between customers is listed as a limitation in the README.
 
 **The journey script read too early.** The first run stopped with "element is not enabled", and the next failed four checks. The URL changes a moment before React redraws, and the customer and job pages share a status dropdown and badge, so the script was reading the old page. It now waits for the next page's heading, and every check passed with no change to the app. Each failure could have been a real bug, so each was rerun on a fresh database before being dismissed.
 
@@ -338,10 +338,10 @@ Start both servers, add the sample data, and open http://localhost:5173. Every s
 |---|---|---|
 | Overview | Open the app | Four counts, the next appointments, and each person's open jobs |
 | Enquiry | Click **New enquiries**, then **Chloe Evans** | Status New Enquiry, and Next step says to book the first job |
-| Booking | Click **Book the first job**, then choose Sam Patel, a future date and a description, and save | The form starts with Chloe selected, then "Job booked." appears and the job's page says "Onboarding status: In Progress" |
+| Booking | Click **Book the first job**, then choose Sam Patel, a date and time in the future and a description, and save | The form starts with Chloe selected, then "Job booked." appears and the job's page says "Onboarding status: In Progress" |
 | Customer's page | Click Chloe's name | Status In Progress, and Next step says to complete the job on that date |
 | Completion | Click the Next step link, choose Completed and click **Update status** | "Job status updated." appears, the job's page says "Onboarding status: Active", and Next step offers a follow-up maintenance visit |
-| Follow-up | Click it, then choose Priya Shah and a future date, and save | The form starts with Chloe and "Maintenance visit" filled in, and Chloe stays Active |
+| Follow-up | Click **Book a follow-up maintenance visit**, then choose Priya Shah and a date and time in the future, and save | The form starts with Chloe and "Maintenance visit" filled in, and Chloe stays Active |
 | Back to the start | Click **Overview** | New enquiries has dropped by one, and Priya Shah has one more open job |
 
 **The brief, item by item**

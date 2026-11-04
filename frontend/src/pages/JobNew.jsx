@@ -6,7 +6,7 @@ export default function JobNew() {
   const navigate = useNavigate()
   const showMessage = useOutletContext()
   const [searchParams] = useSearchParams()
-  // Customer and job pages link here with the customer's id, so they start selected.
+  // Customer and job pages link here with the customer's id, so that customer starts selected.
   const customerId = searchParams.get('customer_id')
 
   async function save(values) {
