@@ -1,0 +1,9 @@
+# Runs the app
+fastapi==0.162.0
+pydantic==2.14.2
+sqlalchemy==2.1.8
+uvicorn==0.54.0
+
+# Runs the tests
+httpx2==2.16.0
+pytest==9.2.0

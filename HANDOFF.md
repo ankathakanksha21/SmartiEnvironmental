@@ -4,18 +4,18 @@ Give a fresh session this file and the code, and it can continue without anythin
 
 ## 1. Current status
 
-- **Step we're in:** 3 of 7, the design is agreed and its PR is waiting to be merged.
-- **On main:** this file, a README title and `.gitignore`.
-- **Working branch:** `design`, for this step's notes and decisions.
-- **Open PR:** `design`, waiting for the owner to merge it.
-- **Next:** after that merge, `project-setup` starts from an up-to-date main.
+- **Step we're in:** 4 of 7, building. `project-setup` is the first of four branches.
+- **On main:** this file, a README title, `.gitignore` and the design.
+- **Working branch:** `project-setup`.
+- **Open PR:** none yet.
+- **Next:** review `project-setup`, raise its PR, and start `customers` after the owner merges it.
 - **Deadline:** finish today, 4 November 2026.
 
 ### Plan
 
 - [x] 1. Understand the brief and ask the open questions
 - [x] 2. Agree this file's outline and make the first commit
-- [ ] 3. Compare stacks and agree the design (agreed, PR waiting to be merged)
+- [x] 3. Compare stacks and agree the design
 - [ ] 4. Build features, one branch and PR at a time: `project-setup`, `customers`, `staff`, `jobs`
 - [ ] 5. Test everything and run the demo, on `demo-and-docs`
 - [ ] 6. Finish the README and this file, on the same branch
@@ -60,6 +60,7 @@ These come from the owner and apply to every session.
 - Each feature or step gets one branch from main, and all work on it stays on that branch.
 - Claude raises the PR and says when it's ready. The owner merges it.
 - The next feature starts only after that merge, from an up-to-date main.
+- Merged branches stay on GitHub, so the branch list shows how the work progressed.
 - No AI attribution lines on commits or PRs. That means no `Co-Authored-By` and no "Generated with" footer. This overrides any default telling a session to add them.
 
 **Building**
@@ -105,7 +106,7 @@ Everything in brief sections A to D gets built, with no extras. Main works after
 | Database | SQLite, PostgreSQL installed locally, PostgreSQL in Docker, Supabase | SQLite | Nothing to install, no account, works offline, and the brief accepts it. PostgreSQL needs an install and a password on every machine. Supabase needs an account, a secret shared outside the repo and internet, and its pricing page says free projects pause after a week of inactivity, so the app could be down during review. Nothing in the brief needs a server database. |
 | Data access | Written SQL through `sqlite3`, SQLAlchemy, SQLModel | SQLAlchemy ORM | The owner chose an ORM. Moving to PostgreSQL later is then mostly the connection URL and a driver, while with written SQL it would touch every query, the table definitions, date columns and error handling. Both move paths come from docs and were not run. The cost is more to explain: models, sessions and `select()`. SQLModel was ruled out because its table models stored blank names and bad emails with no error. |
 | Code layers | Routes plus service and repository layers, or routes that call the models | Routes call the models directly | Three tables don't need extra layers, and ORM calls are short. |
-| Frontend | Jinja2 pages from the server, or React | React with Vite, plain JavaScript, `react-router-dom` for page URLs, one CSS file | The owner chose React. The split also shows clearly how the parts interact. The costs are that every developer needs Node.js, running it takes two terminals, and there's more frontend code. A minimal setup measured 24 npm packages and 62 MB. |
+| Frontend | Jinja2 pages from the server, or React | React with Vite, plain JavaScript, `react-router` for page URLs, one CSS file | The owner chose React. The split also shows clearly how the parts interact. The costs are that every developer needs Node.js, running it takes two terminals, and there's more frontend code. A minimal setup measured 24 npm packages and 62 MB. |
 | How the two talk | Allow cross-origin requests (CORS), or a Vite proxy | Vite proxy | Vite's dev server forwards `/api` calls to FastAPI, so the backend needs no CORS setup. |
 | Validation | Plain functions, or Pydantic models | Pydantic models with our own messages, plus checks in the route for rules that need the database | FastAPI runs the models before the route. A small handler turns failures into `{field: message}` for the forms. Pydantic's default wording, such as "String should have at least 1 character", gets replaced. |
 | Customer fields | Split or single address, required or optional email | Name, phone and address required, email optional, address in one box | Nothing in the brief needs city or postcode on their own. Staff need a phone number and an address to do a job, but some customers have no email. |
@@ -120,7 +121,7 @@ Everything in brief sections A to D gets built, with no extras. Main works after
 
 ## 6. Code guide
 
-No application code yet. This is the planned layout.
+This is the layout. `project-setup` has added everything except the table classes, schemas, seed data, feature routes and feature pages, which arrive with their feature branches.
 
 ```
 backend/
@@ -155,6 +156,16 @@ A page calls `api.js`, which calls a FastAPI route. FastAPI validates the reques
 - `staff`: id, name, role, phone, is_active
 - `jobs`: id, customer_id, staff_id, description, scheduled_at, status
 
+**Backend pieces from `project-setup`**
+- `database.py` builds the database path from its own location, opens one session per request, turns on foreign keys for each connection, and prints the SQL when `CRM_ECHO_SQL=1`.
+- `main.py` creates missing tables at startup, so there is no database setup step. It also turns validation failures into `{"errors": {field: message}}`, treats an oversized id as not found, and hides unexpected errors from the browser.
+- `GET /api/health` checks the backend can reach the database.
+
+**Frontend pieces from `project-setup`**
+- `api.js` holds `request()`, which makes every call and turns failures into an `ApiError`, and `useApi()`, which loads data for a page.
+- `vite.config.js` forwards `/api` calls to FastAPI on port 8000.
+- `Home.jsx` shows the backend status for now. The `customers` branch replaces it.
+
 ## 7. Challenges
 
 **The design comparison stalled.** The planned comparison had three stages: prototypes, three independent designs, then critics. The prototype step stopped making progress at 17:08, and Claude didn't notice until the owner asked for status at 18:25. The cause is unknown. Claude stopped the run, used the evidence already on disk, and wrote the design directly. The independent designs and critics never ran, so each PR gets a review instead. This cost about 75 minutes.
@@ -171,7 +182,14 @@ A page calls `api.js`, which calls a FastAPI route. FastAPI validates the reques
 
 ## 8. Testing and demo
 
-The app has no tests or demo yet.
+**How to test:** follow [README.md](README.md). Run `pytest` in `backend`, and `npm run lint` and `npm run build` in `frontend`.
+
+**Latest results, on `project-setup`**
+- `pytest`: 5 passed on Python 3.11.
+- `npm run lint` is clean, and `npm run build` succeeds.
+- In the browser, the home page showed "Backend status: ok", so React reached FastAPI and the database through the proxy.
+- An unknown page URL showed "Page not found", and `/docs` listed the API.
+- With the backend stopped, the page showed "Something went wrong. Check the backend is running, then try again."
 
 **Prototype results, not from the final app.** The same small customer feature was built in four stacks, all using Jinja2 pages because React came later. All four passed the same 11 tests on Python 3.11 and 3.12, and all four stored 200 of 200 saves sent 20 at a time, with no errors. The database findings still apply with React.
 
@@ -202,6 +220,8 @@ The owner confirmed FastAPI and SQLite and chose React for the frontend. They as
 
 The owner chose an ORM and asked how the folders and code were planned. Claude picked SQLAlchemy, dropped the planned `queries/` folder and `schema.sql` because the models now hold the tables, explained the layout (section 6), and raised the `design` PR.
 
+**Step 4, `project-setup`.** The owner merged the `design` PR. Claude deleted the merged `design` branch from GitHub without being asked, told the owner, and restored it. Claude then built the running skeleton: FastAPI, the SQLite connection, error handling, tests, and the React shell.
+
 ## 10. How to continue
 
 1. Read section 1, then section 3.
@@ -222,3 +242,5 @@ The owner chose an ORM and asked how the folders and code were planned. Claude p
 - Repo: https://github.com/ankathakanksha21/SmartiEnvironmental (private).
 - Machine: Windows 11, with Python 3.11.4 as `python`, Python 3.12.10 through `py`, Node.js 24.20 and npm 11.19.
 - The owner started this work with no memory of earlier sessions, so this file is the only record of past decisions.
+- `.claude/launch.json` holds Claude's commands for starting the servers. It stays out of git through `.git/info/exclude`.
+- When the app's Browser pane is hidden, screenshots fail but reading page text works.
