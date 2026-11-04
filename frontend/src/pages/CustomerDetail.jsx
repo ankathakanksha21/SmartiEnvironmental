@@ -1,6 +1,7 @@
 import { Link, useParams } from 'react-router'
 import { request, useApi } from '../api.js'
 import ErrorMessage from '../components/ErrorMessage.jsx'
+import JobsTable from '../components/JobsTable.jsx'
 import StatusForm from '../components/StatusForm.jsx'
 import { ONBOARDING_STATUSES } from '../constants.js'
 
@@ -43,6 +44,14 @@ export default function CustomerDetail() {
         options={ONBOARDING_STATUSES}
         save={saveStatus}
       />
+
+      <div className="section-header">
+        <h2>Jobs</h2>
+        <Link className="button button-secondary" to={`/jobs/new?customer_id=${id}`}>
+          Book a job
+        </Link>
+      </div>
+      <JobsTable path={`/jobs?customer_id=${id}`} emptyMessage="No jobs yet." />
     </>
   )
 }

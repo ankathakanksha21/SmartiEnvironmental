@@ -7,7 +7,7 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 
 from app import database, models
-from app.routes import customers, staff
+from app.routes import customers, jobs, staff
 
 
 @asynccontextmanager
@@ -20,6 +20,7 @@ async def lifespan(app):
 app = FastAPI(title="Smarti Environmental CRM", lifespan=lifespan)
 app.include_router(customers.router)
 app.include_router(staff.router)
+app.include_router(jobs.router)
 
 
 @app.exception_handler(RequestValidationError)

@@ -107,6 +107,37 @@ main.container {
   margin: 0;
 }
 
+.section-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 28px 0 12px;
+}
+
+.section-header h2 {
+  margin: 0;
+}
+
+/* Upcoming and All jobs links */
+.view-tabs {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 16px;
+}
+
+.view-tabs a {
+  padding: 4px 12px;
+  border-radius: 6px;
+  text-decoration: none;
+}
+
+.view-tabs a.active {
+  background: var(--accent);
+  color: #ffffff;
+}
+
 /* Buttons */
 button,
 .button {
@@ -201,6 +232,11 @@ tbody tr:last-child td {
   white-space: pre-line;
 }
 
+.muted {
+  color: var(--muted);
+  font-size: 14px;
+}
+
 /* Forms */
 .form {
   max-width: 520px;
@@ -239,6 +275,11 @@ textarea {
   display: block;
   margin-top: 4px;
   color: var(--error);
+  font-size: 14px;
+}
+
+.form-hint {
+  margin: -8px 0 16px;
   font-size: 14px;
 }
 
@@ -290,6 +331,22 @@ textarea {
 .badge-inactive {
   background: #e9ecec;
   color: #4f5b58;
+}
+
+.badge-pending {
+  background: #e7edfb;
+  color: #2c4a9a;
+}
+
+.badge-completed {
+  background: #dcf3e8;
+  color: #17643f;
+}
+
+.badge-overdue {
+  margin-left: 6px;
+  background: var(--error-background);
+  color: var(--error);
 }
 
 /* Messages */

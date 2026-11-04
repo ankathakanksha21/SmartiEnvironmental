@@ -1,6 +1,7 @@
 import { Link, useParams } from 'react-router'
 import { useApi } from '../api.js'
 import ErrorMessage from '../components/ErrorMessage.jsx'
+import JobsTable from '../components/JobsTable.jsx'
 import StatusBadge from '../components/StatusBadge.jsx'
 
 export default function StaffDetail() {
@@ -29,6 +30,9 @@ export default function StaffDetail() {
           <StatusBadge status={member.is_active ? 'Active' : 'Inactive'} />
         </dd>
       </dl>
+
+      <h2>Jobs</h2>
+      <JobsTable path={`/jobs?staff_id=${id}`} emptyMessage="No jobs yet." />
     </>
   )
 }
