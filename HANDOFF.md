@@ -4,20 +4,21 @@ Give a fresh session this file and the code, and it can continue without anythin
 
 ## 1. Current status
 
-- **Step we're in:** 3 of 7, comparing stacks and agreeing the design.
+- **Step we're in:** 3 of 7, the design is agreed and its PR is waiting to be merged.
 - **On main:** this file, a README title and `.gitignore`.
-- **Open PR:** none.
-- **Next:** the owner approves the stack and design, then the first feature branch starts.
+- **Working branch:** `design`, for this step's notes and decisions.
+- **Open PR:** `design`, waiting for the owner to merge it.
+- **Next:** after that merge, `project-setup` starts from an up-to-date main.
 - **Deadline:** finish today, 4 November 2026.
 
 ### Plan
 
 - [x] 1. Understand the brief and ask the open questions
 - [x] 2. Agree this file's outline and make the first commit
-- [ ] 3. Compare stacks and agree the design (in progress)
-- [ ] 4. Build features, one branch and PR at a time
-- [ ] 5. Test everything and run the demo
-- [ ] 6. Finish the README and this file
+- [ ] 3. Compare stacks and agree the design (agreed, PR waiting to be merged)
+- [ ] 4. Build features, one branch and PR at a time: `project-setup`, `customers`, `staff`, `jobs`
+- [ ] 5. Test everything and run the demo, on `demo-and-docs`
+- [ ] 6. Finish the README and this file, on the same branch
 - [ ] 7. Owner merges the last PR
 
 ## 2. Project summary and checklist
@@ -65,7 +66,8 @@ These come from the owner and apply to every session.
 - Take the minimal path, and don't over-complicate.
 - Add no features beyond the brief.
 - No temporary fixes or shortcuts. Everything built must be finished and working.
-- Give the reasoning behind each decision.
+- Within that minimal path, aim for the best approach and the best decisions.
+- Work through decisions with the owner, and give the reasoning behind each one.
 - If an instruction is unclear, ask instead of assuming.
 
 **Writing**
@@ -74,33 +76,111 @@ These come from the owner and apply to every session.
 - The README does not mention Claude Code.
 - This file holds summaries, never the owner's prompts word for word.
 - Setup steps live only in the README, and this file links to them.
-- Update this file on each branch before asking the owner to merge.
+- Record notes, results and decisions in this file at every step, and bring it up to date on the branch before asking the owner to merge.
 
 ## 4. Feature priorities
 
-Everything in brief sections A to D gets built, with no extras. The build order goes here once the design is agreed.
+Everything in brief sections A to D gets built, with no extras. Main works after every merge.
+
+| Order | Branch | What it adds | Why now |
+|---|---|---|---|
+| 1 | `design` | The decisions in this file | Nothing gets built before the design is agreed. |
+| 2 | `project-setup` | Running API and database, React app shell, error handling, test setup, README setup steps | Every feature needs these. |
+| 3 | `customers` | API and pages for brief A and B | Jobs belong to customers. Onboarding status is a column on the customer, so it comes with them. |
+| 4 | `staff` | API and pages for the staff list from brief D | Jobs get assigned to staff. |
+| 5 | `jobs` | API and pages for brief C and the rest of D | It needs both tables above and holds the most rules. |
+| 6 | `demo-and-docs` | Sample data, demo run, final README | It documents what exists, once it exists. |
+
+**Left out on purpose**
+- Deleting records: the brief doesn't ask for it, and keeping records protects job history.
+- A Cancelled job status: the brief lists three statuses. Until one is added, a cancelled visit can only be edited or marked Completed.
+- Search, job durations, status history and login: the brief doesn't ask for them.
 
 ## 5. Design decisions
 
 | Decision | Options considered | Choice | Why |
 |---|---|---|---|
 | Appointments and jobs | One record, or two linked records | One Job record | A visit gets booked once, and its date and staff member can't disagree between two records. "Upcoming appointments" is a filtered list of jobs. The downside is that a visit with no work attached still gets recorded as a job. |
-| Stack | FastAPI or Flask, with SQLite, PostgreSQL or Supabase | Not decided yet | The comparison is running. |
+| Backend framework | FastAPI, Flask | FastAPI | The owner chose it. Its JSON responses and automatic `/docs` test page suit a React frontend. |
+| Database | SQLite, PostgreSQL installed locally, PostgreSQL in Docker, Supabase | SQLite | Nothing to install, no account, works offline, and the brief accepts it. PostgreSQL needs an install and a password on every machine. Supabase needs an account, a secret shared outside the repo and internet, and its pricing page says free projects pause after a week of inactivity, so the app could be down during review. Nothing in the brief needs a server database. |
+| Data access | Written SQL through `sqlite3`, SQLAlchemy, SQLModel | SQLAlchemy ORM | The owner chose an ORM. Moving to PostgreSQL later is then mostly the connection URL and a driver, while with written SQL it would touch every query, the table definitions, date columns and error handling. Both move paths come from docs and were not run. The cost is more to explain: models, sessions and `select()`. SQLModel was ruled out because its table models stored blank names and bad emails with no error. |
+| Code layers | Routes plus service and repository layers, or routes that call the models | Routes call the models directly | Three tables don't need extra layers, and ORM calls are short. |
+| Frontend | Jinja2 pages from the server, or React | React with Vite, plain JavaScript, `react-router-dom` for page URLs, one CSS file | The owner chose React. The split also shows clearly how the parts interact. The costs are that every developer needs Node.js, running it takes two terminals, and there's more frontend code. A minimal setup measured 24 npm packages and 62 MB. |
+| How the two talk | Allow cross-origin requests (CORS), or a Vite proxy | Vite proxy | Vite's dev server forwards `/api` calls to FastAPI, so the backend needs no CORS setup. |
+| Validation | Plain functions, or Pydantic models | Pydantic models with our own messages, plus checks in the route for rules that need the database | FastAPI runs the models before the route. A small handler turns failures into `{field: message}` for the forms. Pydantic's default wording, such as "String should have at least 1 character", gets replaced. |
+| Customer fields | Split or single address, required or optional email | Name, phone and address required, email optional, address in one box | Nothing in the brief needs city or postcode on their own. Staff need a phone number and an address to do a job, but some customers have no email. |
+| Date and time | Two columns, or one | One `scheduled_at` DateTime column | One value is simpler to sort and compare. A `datetime-local` input sends one value, Pydantic turns it into a Python datetime, and SQLAlchemy stores it. |
+| Job type | A column, or read it from the staff role | No column | The assigned person's role already says fitting or maintenance, and two copies could disagree. |
+| Staff who leave | Delete, active flag, no removal | `is_active` flag | They drop off the booking list, and past jobs keep their name. |
+| Status changes | Inside the edit form, or their own small form | Their own form on the record's page | It's the most frequent action, and it shouldn't re-run the date rules. |
+| Booking rules | None, or basic checks | No booking in the past, and no two open jobs for one staff member at the same date and time | These are the two mistakes a booking form should catch. With no job durations, only exact matches count as a clash. |
 | Where this file lives | Committed, or local only | Committed to the repo root | It's backed up, and a fresh session gets it with one clone. It holds no prompts. |
 | AI attribution lines | Keep, or remove | Removed | The owner's choice. |
 | AI mention in the README | One line, or none | None | The owner's choice. |
 
 ## 6. Code guide
 
-No application code yet.
+No application code yet. This is the planned layout.
+
+```
+backend/
+  app/
+    main.py        creates the app, adds the routes and error handlers
+    database.py    database connection and a session for each request
+    models.py      the three tables as SQLAlchemy classes
+    schemas.py     request and response shapes, validation rules
+    seed.py        sample data
+    routes/        one file per feature: customers, staff, jobs
+  tests/           pytest, one file per feature
+frontend/
+  src/
+    main.jsx       starts React and defines the page URLs
+    api.js         every call to the backend goes through here
+    constants.js   status and role lists
+    style.css
+    components/    shared pieces such as form fields and the jobs table
+    pages/         one file per page
+```
+
+A page calls `api.js`, which calls a FastAPI route. FastAPI validates the request with a schema, the route reads or writes through the models, and the JSON result goes back to the page. If validation fails, the page shows each error next to its field.
+
+**Why this layout**
+- `backend/` and `frontend/` are separate programs, each with its own language and tools.
+- Each kind of code has one home: tables in `models.py`, input rules in `schemas.py`, URLs in `routes/`, screens in `pages/`.
+- Customers, staff and jobs each get one route file and their own pages, so a new feature adds one of each.
+- There are no service or repository layers, because three tables don't need them.
+
+**Tables**
+- `customers`: id, name, phone, email, address, onboarding_status
+- `staff`: id, name, role, phone, is_active
+- `jobs`: id, customer_id, staff_id, description, scheduled_at, status
 
 ## 7. Challenges
 
-None yet.
+**The design comparison stalled.** The planned comparison had three stages: prototypes, three independent designs, then critics. The prototype step stopped making progress at 17:08, and Claude didn't notice until the owner asked for status at 18:25. The cause is unknown. Claude stopped the run, used the evidence already on disk, and wrote the design directly. The independent designs and critics never ran, so each PR gets a review instead. This cost about 75 minutes.
+
+**Problems the prototypes found, and how the design avoids them**
+- FastAPI can run a sync route and its database dependency on different threads, and `sqlite3` rejects that by default. Without `check_same_thread=False`, 179 of 300 requests failed with only 2 at a time. SQLAlchemy sets this itself for SQLite files, so we don't have to.
+- SQLite ignores foreign keys by default and stored a job for a customer that didn't exist. Run `PRAGMA foreign_keys = ON` on every connection, through a SQLAlchemy connect event.
+- SQLAlchemy's default pool keeps the SQLite file open, so pytest couldn't delete its temporary folder on Windows (`NotADirectoryError`). Use `NullPool`, which closes each connection after use.
+- Reading a record after its session closed raised `DetachedInstanceError`. Finish reading records inside the request.
+- SQLAlchemy's `DateTime` column rejected a date passed as text with a `TypeError`. Pydantic converts it to a Python datetime first.
+- A relative database path creates a new empty file in whichever folder the app starts from. Build the path from the project folder.
+- An id too large for SQLite raises `OverflowError`, which gives a 500 error. Treat it as not found.
+- `TestClient` skips startup unless used in a `with` block, so the tables don't get created.
 
 ## 8. Testing and demo
 
-No tests or demo yet.
+The app has no tests or demo yet.
+
+**Prototype results, not from the final app.** The same small customer feature was built in four stacks, all using Jinja2 pages because React came later. All four passed the same 11 tests on Python 3.11 and 3.12, and all four stored 200 of 200 saves sent 20 at a time, with no errors. The database findings still apply with React.
+
+| Stack | App lines | Installed packages |
+|---|---|---|
+| FastAPI + `sqlite3` | 107 | 18 |
+| FastAPI + SQLAlchemy | 98 | 19 |
+| FastAPI + SQLModel | 94 | 20 |
+| Flask + `sqlite3` | 86 | 7 |
 
 ## 9. Session summaries
 
@@ -110,7 +190,17 @@ No tests or demo yet.
 
 **Step 2.** The owner chose one Job record, suggested FastAPI with PostgreSQL or Supabase while staying open to alternatives, set the branch and merge rule, and asked for summaries instead of prompts in this file. Claude proposed ten sections for this file and started comparing stacks with working prototypes in a scratch folder.
 
-**Step 3.** The owner approved the ten sections and asked that current state, results, notes, the current step and the plan be included too. They also set today as the deadline, asked to remove the attribution lines, and asked to keep AI out of the README. They confirmed that each feature starts only after the previous one is merged. Claude made the first commit.
+**Step 3.** The owner approved the ten sections and asked that current state, results, notes, the current step and the plan be included too. They also set today as the deadline, asked to remove the attribution lines, and asked to keep AI out of the README. They confirmed that each feature starts only after the previous one is merged, and asked for the minimal path with no temporary fixes, the best decisions with reasoning for each, and notes in this file at every step. Claude made the first commit.
+
+The owner then asked whether Claude had missed the rest of that message. Claude had recorded most of it but not acknowledged it in its reply, and this file was missing the rule on notes at every step and the rule on best decisions. Claude added both.
+
+The owner asked how long the project would take and who does what. Claude estimated 2 to 3 hours, later corrected to 3 to 3.5 hours when the comparison ran slowly. On roles: the owner decides, reviews, merges and presents the work, and Claude recommends, codes, tests and documents.
+
+**Step 3, design.** The owner asked for status at 18:25. Claude found the comparison had stalled, stopped it, and wrote the design from the evidence it had collected: FastAPI, SQLite and written SQL.
+
+The owner confirmed FastAPI and SQLite and chose React for the frontend. They asked what "written SQL, not an ORM" means, then whether an ORM removes the PostgreSQL downside. Claude explained both, and said an ORM mostly does remove it. Claude also corrected its earlier answer, which had said the written SQL move only changes placeholders, when it also touches table definitions, date columns and error handling. Claude recommended written SQL because the move isn't part of this project.
+
+The owner chose an ORM and asked how the folders and code were planned. Claude picked SQLAlchemy, dropped the planned `queries/` folder and `schema.sql` because the models now hold the tables, explained the layout (section 6), and raised the `design` PR.
 
 ## 10. How to continue
 
@@ -130,5 +220,5 @@ No tests or demo yet.
 ## 11. Notes
 
 - Repo: https://github.com/ankathakanksha21/SmartiEnvironmental (private).
-- Machine: Windows 11, with Python 3.11.4 as `python` and Python 3.12.10 through `py`.
+- Machine: Windows 11, with Python 3.11.4 as `python`, Python 3.12.10 through `py`, Node.js 24.20 and npm 11.19.
 - The owner started this work with no memory of earlier sessions, so this file is the only record of past decisions.
