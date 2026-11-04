@@ -207,6 +207,10 @@ tbody tr:last-child td {
   border-bottom: none;
 }
 
+.no-wrap {
+  white-space: nowrap;
+}
+
 /* A record's details */
 .details {
   display: grid;

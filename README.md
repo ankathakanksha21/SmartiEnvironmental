@@ -1,6 +1,10 @@
 # Smarti Environmental CRM
 
-A simple web-based CRM for managing customers, appointments, fitters and maintenance engineers.
+A simple web-based CRM for a business that manages customers, appointments, fitters and maintenance engineers. Office staff use it to add customers, track their onboarding, book jobs, assign them to staff and follow their progress.
+
+- [Getting started](#getting-started)
+- [Architecture and design decisions](#architecture-and-design-decisions)
+- [Development process](#development-process)
 
 ## Getting started
 
@@ -50,7 +54,23 @@ Open http://localhost:5173. You should see the Customers page.
 
 If you switch git branches while `npm run dev` is running, stop it and start it again. A branch switch can make Vite restart itself and lose its link to the backend.
 
-### 3. Run the tests
+### 3. Add the sample data
+
+This step is optional. It adds 4 customers, 4 staff members and 7 jobs, with dates worked out from today. Open a third terminal and go to the backend folder:
+
+```bash
+cd backend
+```
+
+Activate the virtual environment as in step 1, then run:
+
+```bash
+python -m app.seed
+```
+
+It only runs on a database with no customers. To start again, stop the backend, delete `backend/crm.db`, start the backend and run this again.
+
+### 4. Run the tests
 
 With the virtual environment active, in the `backend` folder:
 
@@ -58,7 +78,14 @@ With the virtual environment active, in the `backend` folder:
 pytest
 ```
 
-### 4. Try the main features
+To check the frontend, in the `frontend` folder:
+
+```bash
+npm run lint
+npm run build
+```
+
+### 5. Try the main features
 
 **Customers**
 1. Click **Add customer**, then click the button on the form without filling anything in. Each required field shows an error.
@@ -81,3 +108,195 @@ A job is a booked visit, so one record covers both the appointment and the work.
 4. On the job's page, choose **In Progress** and click **Update status**, then do the same with **Completed**.
 5. Click **Jobs**. **Upcoming** shows future jobs that aren't completed, soonest first. **All jobs** shows everything.
 6. Open the customer and the staff member. Each page lists their jobs.
+
+## Architecture and design decisions
+
+### Technologies
+
+| Part | Choice | Why |
+|---|---|---|
+| Backend | Python and FastAPI | FastAPI checks each request against a Python class, returns JSON and gives a `/docs` page for trying every call. |
+| Database | SQLite | There is nothing to install, it needs no account, and the data is one file. One office using one app doesn't need a database server. |
+| Database code | SQLAlchemy ORM | Tables are Python classes, and queries are Python calls. Moving to PostgreSQL later is mostly a new connection URL and driver. |
+| Validation | Pydantic | It comes with FastAPI, and the rules sit with the fields they check. |
+| Frontend | React with Vite | Each page is a small component, and the frontend only talks to the backend through its API. `react-router` gives each page its own URL. |
+| Tests | pytest | Each test calls the API like the browser would, using its own empty database. |
+
+### Application structure
+
+```
+backend/
+  app/
+    main.py        creates the app, adds the routes and error handlers
+    database.py    database connection and a session for each request
+    models.py      the three tables as SQLAlchemy classes
+    schemas.py     request and response shapes, validation rules
+    seed.py        sample data
+    routes/        one file per feature: customers, staff, jobs
+  tests/           one file per feature, plus test_app.py for shared parts
+frontend/
+  src/
+    main.jsx       starts React and defines the page URLs
+    api.js         every call to the backend goes through here
+    useForm.js     the state every form needs
+    constants.js   status and role lists
+    components/    shared pieces such as form fields and the jobs table
+    pages/         one file per page
+```
+
+Each kind of code has one home: tables in `models.py`, input rules in `schemas.py`, URLs in `routes/`, screens in `pages/`. Customers, staff and jobs each get a route file and their own pages, so a new feature adds one of each. Three tables don't need service or repository layers, so routes call the models directly.
+
+### Database
+
+```mermaid
+erDiagram
+    CUSTOMERS ||--o{ JOBS : "has"
+    STAFF ||--o{ JOBS : "is assigned"
+    CUSTOMERS {
+        int id PK
+        string name
+        string phone
+        string email "blank if none"
+        string address
+        string onboarding_status
+    }
+    STAFF {
+        int id PK
+        string name
+        string role
+        string phone
+        bool is_active
+    }
+    JOBS {
+        int id PK
+        int customer_id FK
+        int staff_id FK
+        string description
+        datetime scheduled_at
+        string status
+    }
+```
+
+The main design decision is that appointments and jobs share one table. In this business an appointment is a fitter or engineer visiting a customer to do the work, so a job holds the customer, staff member, date and time, description and status. "Upcoming appointments" is a filtered list of jobs. The office books each visit once, and its date and staff member can't disagree between two records.
+
+There is no job type column, because the assigned person's role already says whether it's fitting or maintenance.
+
+### How the main components interact
+
+```mermaid
+flowchart LR
+    Page[React page] --> Api[api.js]
+    Api --> Proxy[Vite proxy]
+    Proxy --> Schema[schemas.py checks input]
+    Schema --> Route[routes/ file]
+    Route --> Model[models.py and SQLAlchemy]
+    Model --> Db[(SQLite)]
+```
+
+The JSON answer travels back along the same path. If the input is invalid, FastAPI stops at `schemas.py`, and the page shows each error next to its field. The route's only other job is the rules that need the database, such as checking that a staff member isn't already booked.
+
+### How data is created, stored, retrieved and updated
+
+| Action | Where you do it | API call | Code in the route | SQL it runs |
+|---|---|---|---|---|
+| Create | Add customer form | `POST /api/customers` | `db.add(customer)`, `db.commit()` | `INSERT INTO customers ...` |
+| Retrieve | Customers page | `GET /api/customers` | `db.scalars(select(Customer)...)` | `SELECT ... FROM customers ORDER BY lower(name)` |
+| Update | Edit details form | `PUT /api/customers/1` | `setattr(...)`, `db.commit()` | `UPDATE customers SET ... WHERE id = ?` |
+
+All of it is stored in `backend/crm.db`.
+
+The ORM writes the SQL. To see it in the terminal, set `CRM_ECHO_SQL` before starting the backend, using the line for your terminal:
+
+| Terminal | Command |
+|---|---|
+| PowerShell | `$env:CRM_ECHO_SQL = "1"` |
+| Command Prompt | `set CRM_ECHO_SQL=1` |
+| Git Bash, macOS or Linux | `export CRM_ECHO_SQL=1` |
+
+### Alternatives I considered
+
+| Choice | Alternative | Why I didn't use it |
+|---|---|---|
+| One Job table | Separate appointments and jobs tables | The date and staff member would sit in two places, and the office would enter each visit twice. |
+| SQLite | PostgreSQL | Every developer would need to install it and set a password, and nothing in the brief needs a database server. |
+| SQLite | Supabase | It needs an account, a secret shared outside the repo, and internet access. Its pricing page says free projects pause after a week of inactivity, so the app could be down during a review. |
+| SQLAlchemy | Written SQL through `sqlite3` | It would show the SQL more plainly and needs no extra library, but moving to PostgreSQL would touch every query, the table definitions, date columns and error handling. |
+| SQLAlchemy | SQLModel | In a prototype, its table models stored blank names and bad emails with no error. |
+| React | Jinja2 pages from the server | These are simpler and need no Node.js. I chose React for the clean split between frontend and API, and accepted the extra install and second terminal. |
+| FastAPI | Flask | Flask was slightly smaller in a prototype, but FastAPI's JSON responses, request checking and `/docs` page suit a React frontend. |
+| Active flag | Deleting staff | Deleting someone would break their past jobs. |
+
+### What I would change with more time
+
+- **Login and roles:** office staff would sign in, and fitters and engineers would get their own view to see their jobs and update the status from site.
+- **Job durations:** these would catch overlapping jobs as well as exact clashes.
+- **A Cancelled status:** this would give a cancelled visit a proper state.
+- **Status history:** this would show who changed a status and when.
+- **Search and paging:** long lists would need both.
+- **Frontend tests:** browser tests with a tool such as Playwright would replace the manual checks.
+- **Database migrations:** Alembic would let the tables change without deleting `crm.db`.
+- **PostgreSQL:** this is the next step if the app were hosted for several users.
+
+### How to continue developing it
+
+- **Add a status:** add it to the list in `schemas.py`, the list in `constants.js`, and a badge colour in `style.css`.
+- **Add a field:** add it to the class in `models.py`, the classes in `schemas.py`, and the form. There are no migrations yet, so delete `backend/crm.db` to rebuild the tables.
+- **Add a feature:** add a table class, schemas, a file in `routes/` included from `main.py`, pages listed in `main.jsx`, and a test file.
+
+`HANDOFF.md` has the full decision log, a code guide and notes for picking the work up.
+
+## Development process
+
+### Prioritisation
+
+I built everything in brief sections A to D, because the brief asks for it and the features depend on each other. Jobs need customers and staff, so those came first. If time had run short, I would have finished customers and jobs properly before adding anything else.
+
+I left out everything the brief doesn't ask for: deleting records, search, login, job durations and status history. Instead I put the time into validation, error handling, tests and these docs.
+
+### Build order
+
+Each step had its own branch and pull request, and main worked after every merge.
+
+| Order | Branch | What it added | Why then |
+|---|---|---|---|
+| 1 | `design` | Decisions and build order | Prototypes settled the stack before any code was written. |
+| 2 | `project-setup` | Running API, database, React shell, tests | Every feature needs these. |
+| 3 | `customers` | Brief A and B | Jobs belong to customers. |
+| 4 | `staff` | The staff list from brief D | Jobs get assigned to staff. |
+| 5 | `jobs` | Brief C and the rest of D | It needs both tables above and holds the most rules. |
+| 6 | `demo-and-docs` | Sample data, demo run, this README | It documents what exists, once it exists. |
+
+### Challenges
+
+- **Choosing the stack without guessing.** I built the same small feature in four stacks and compared lines of code, packages and the problems each one hit. The prototypes showed that an ORM saves little code at this size, so I chose SQLAlchemy for the easier move to PostgreSQL. They also showed that SQLModel's table models don't validate.
+- **Foreign keys.** SQLite ignores them by default and stored a job for a customer that didn't exist. `database.py` now turns them on for every connection.
+- **An edit form saving the wrong record.** Jumping through browser history between two edit pages kept the first customer's values in the form, and saving overwrote the second customer. `useApi` now goes back to loading when the URL changes, which removes the old form.
+- **Accidentally reactivating staff.** An API edit that left out `is_active` used the add form's default and turned an inactive person active. Editing now requires the flag.
+- **Double booking.** Comparing times isn't enough, because 09:30:00 and 09:30:59 look different, so the API drops seconds. Reopening a completed job could also recreate a clash, so that path checks too.
+- **Tests that proved too little.** An early test still passed with its database call deleted, and the phone tests passed with a rule removed. Breaking the code on purpose found these, and I rewrote them.
+- **A date typed straight through.** In Chrome, typing a date with no Tab can send a six-digit year, and the form showed a raw technical message. The API now reads the date itself and says "Enter a valid date and time."
+- **The API breaking after a branch switch.** `git checkout` rewrote `vite.config.js`, and Vite's automatic restart lost the proxy. Restarting `npm run dev` fixes it, and step 2 above says so.
+- **A busy reloader.** `uvicorn --reload` scanned every file in `.venv` and used about 64% of a CPU core. `--reload-dir app` cut that to about 1%.
+
+### Known limitations
+
+- **No login:** anyone who can open the app can change anything. The brief rules out authentication.
+- **No delete:** a cancelled visit can only be edited or marked Completed.
+- **Exact clashes only:** jobs have no duration, so booking someone at 09:30 and 09:45 is allowed.
+- **Simultaneous bookings:** two requests at the same moment can both pass the double-booking check, because the database doesn't enforce the rule. A partial unique index would fix it, which is more than one office needs.
+- **Moving completed jobs:** a completed job can't be moved onto a time when that person has an open job, although it wouldn't create a clash.
+- **Leavers keep their open jobs:** marking someone inactive doesn't move their open jobs. Their page lists them, so the office can reassign each one.
+- **Local time only:** dates use the server's clock, which suits one site running locally.
+- **Table changes need a fresh database:** there are no migrations, and the app only creates missing tables.
+- **Name order:** accented names sort after Z, because SQLite's `lower()` only handles English letters.
+- **No duplicate check:** two customers can have the same name and phone number.
+- **Long lists:** there is no search or paging yet.
+- **No automated frontend tests:** the pages were checked by hand in the browser.
+
+### How I tested it
+
+- **Automated tests:** `pytest` runs 114 tests. They cover saving, reading and updating each record, every validation rule, the booking rules, unknown records, database failures and the sample data.
+- **Frontend checks:** `npm run lint` and `npm run build` ran on every code branch.
+- **Browser checks:** I used the pages on each code branch, including blank and invalid forms and unknown records. I also stopped the backend once to check the error message.
+- **Code review:** each code branch had a separate review for bugs and over-complication before its pull request. That included breaking the code on purpose to check that a test failed.
+- **Fresh clone:** at the end, I cloned the repo into an empty folder and followed this README exactly, on Python 3.11 and 3.12.

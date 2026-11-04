@@ -4,11 +4,11 @@ Give a fresh session this file and the code, and it can continue without anythin
 
 ## 1. Current status
 
-- **Step we're in:** 4 of 7, building. `jobs` is the last of four branches.
-- **On main:** the design, the running skeleton, customers with onboarding status, and the staff list.
-- **Working branch:** `jobs`.
-- **Open PR:** [#5](https://github.com/ankathakanksha21/SmartiEnvironmental/pull/5), `jobs`, waiting for the owner to merge it.
-- **Next:** after that merge, `demo-and-docs` starts from an up-to-date main.
+- **Step we're in:** 5 of 7, the final tests, demo and docs.
+- **On main:** all of brief sections A to D.
+- **Working branch:** `demo-and-docs`.
+- **Open PR:** none yet.
+- **Next:** finish the fresh-clone test, the demo and the final review, then raise the last PR.
 - **Deadline:** finish today, 4 November 2026.
 
 ### Plan
@@ -16,7 +16,7 @@ Give a fresh session this file and the code, and it can continue without anythin
 - [x] 1. Understand the brief and ask the open questions
 - [x] 2. Agree this file's outline and make the first commit
 - [x] 3. Compare stacks and agree the design
-- [ ] 4. Build features, one branch and PR at a time: `project-setup`, `customers`, `staff`, `jobs`
+- [x] 4. Build features, one branch and PR at a time: `project-setup`, `customers`, `staff`, `jobs`
 - [ ] 5. Test everything and run the demo, on `demo-and-docs`
 - [ ] 6. Finish the README and this file, on the same branch
 - [ ] 7. Owner merges the last PR
@@ -38,15 +38,15 @@ A simple web CRM for a business that manages customers, appointments, fitters an
 | D. Maintain a list of fitters and maintenance engineers | tested |
 | D. Assign jobs to individual staff members | tested |
 | D. Track job statuses (Pending, In Progress, Completed) | tested |
-| Basic, usable interface | started |
-| Shows data being created, stored, retrieved and updated | started |
-| Logical, maintainable code structure | started |
-| Input validation and basic error handling | started |
-| Git version control | started |
-| README: install, set up database or test data, run locally, test main functionality | started |
-| README: technologies and why, app and database structure, how components interact, alternatives, what would change with more time | not started |
-| README: build order, challenges and fixes, limitations, how it was tested | not started |
-| README: explains the feature prioritisation | not started |
+| Basic, usable interface | tested |
+| Shows data being created, stored, retrieved and updated | tested |
+| Logical, maintainable code structure | built |
+| Input validation and basic error handling | tested |
+| Git version control | built |
+| README: install, set up database or test data, run locally, test main functionality | tested |
+| README: technologies and why, app and database structure, how components interact, alternatives, what would change with more time | built |
+| README: build order, challenges and fixes, limitations, how it was tested | built |
+| README: explains the feature prioritisation | built |
 
 The code must be understandable, and the owner must be able to explain it. Another developer must be able to follow the docs, understand what was built and why, and continue the work.
 
@@ -123,8 +123,6 @@ Everything in brief sections A to D gets built, with no extras. Main works after
 | AI mention in the README | One line, or none | None | The owner's choice. |
 
 ## 6. Code guide
-
-This is the full layout. Only `seed.py` is still to come.
 
 ```
 backend/
@@ -225,6 +223,21 @@ A page calls `api.js`, which calls a FastAPI route. FastAPI validates the reques
 - `JobForm` loads the customer and staff lists for its dropdowns. It keeps an inactive staff member as an option only if the job already has them.
 - A customer's **Book a job** button opens `/jobs/new?customer_id=1`, and `JobNew` starts with that customer selected.
 
+**Sample data**
+- `seed.py` adds 4 customers, 4 staff members and 7 jobs. Dates are relative to today, so the Upcoming list and the Overdue label always have something to show.
+- It adds nothing if the database already has customers, so running it twice can't duplicate records.
+
+**Terms to be able to explain**
+- **ORM:** lets the code use Python objects, and SQLAlchemy writes the SQL.
+- **Session (`db`):** one conversation with the database. `get_db` gives each request its own, and `db.commit()` saves the changes.
+- **`Depends(get_db)`:** FastAPI runs `get_db` and passes the result to the route.
+- **`response_model`:** the shape of the JSON a route returns.
+- **`Annotated[str, AfterValidator(required)]`:** a string that also has to pass that function.
+- **`joinedload`:** fetches related records in the same query, so a list doesn't run one extra query per row.
+- **`useState`:** a value a component remembers between renders.
+- **`useEffect`:** code that runs after a render. Here it loads data when the URL changes.
+- **Vite proxy:** the dev server passes `/api` calls to FastAPI, so the browser only ever talks to one address.
+
 **One request traced: adding a customer**
 1. `CustomerNew.jsx` calls `request('/customers', { method: 'POST', body: values })` when the form is submitted.
 2. Vite forwards the call to FastAPI.
@@ -236,6 +249,8 @@ A page calls `api.js`, which calls a FastAPI route. FastAPI validates the reques
 ## 7. Challenges
 
 **The design comparison stalled.** The planned comparison had three stages: prototypes, three independent designs, then critics. The prototype step stopped making progress at 17:08, and Claude didn't notice until the owner asked for status at 18:25. The cause is unknown. Claude stopped the run, used the evidence already on disk, and wrote the design directly. The independent designs and critics never ran, so each PR gets a review instead. This cost about 75 minutes.
+
+**Nobody had seen the pages.** The Browser pane in the Claude desktop app stayed hidden, so screenshots failed and clicks sometimes failed too. Page checks read the text and called `click()` from JavaScript, which proves behaviour but not appearance. On `demo-and-docs`, headless Chrome took real screenshots, and the pages looked right on desktop. Dates wrapped onto five lines in a narrow window, so that column no longer wraps.
 
 **The API stopped working in the browser after a branch switch.** Pages said "Something went wrong" and `/api/customers` through Vite returned HTML, although the backend answered correctly on its own. Vite's log showed `git checkout` had rewritten `vite.config.js`, and the automatic restart that followed lost the proxy. Restarting `npm run dev` fixed it, and the README now says so.
 
@@ -346,7 +361,9 @@ The owner chose an ORM and asked how the folders and code were planned. Claude p
 
 **Step 4, `staff`.** Claude built the staff API, tests and pages, following the customer pattern, and checked each flow in the browser. Two independent reviewers found that an API edit could reactivate someone by accident, and Claude fixed it. While the review ran, the owner asked for the workflow as a flow chart, and Claude drew three: how a save moves through the app, how office staff use the CRM, and how each feature gets built. The owner merged the PR.
 
-**Step 4, `jobs`.** Claude built the job API, the booking rules and tests, then the job pages, and added job lists to the customer and staff pages. Each flow got checked in the browser. Three independent reviewers found dead code, a raw date error and some weak tests, and Claude fixed them (section 7). While the review ran, the owner asked who the end users are, and how long is left. Claude said office staff are the users, that fitters and engineers would be the natural next users if login existed, and that about an hour remained.
+**Step 4, `jobs`.** Claude built the job API, the booking rules and tests, then the job pages, and added job lists to the customer and staff pages. Each flow got checked in the browser. Three independent reviewers found dead code, a raw date error and some weak tests, and Claude fixed them (section 7). While the review ran, the owner asked who the end users are, and how long is left. Claude said office staff are the users, that fitters and engineers would be the natural next users if login existed, and that about an hour remained. The owner merged the PR.
+
+**Step 5, `demo-and-docs`.** Claude added the sample data and final README, took screenshots to check how the pages look, and tested from a fresh clone.
 
 ## 10. How to continue
 
@@ -371,7 +388,5 @@ The owner chose an ORM and asked how the folders and code were planned. Claude p
 - `.claude/launch.json` holds Claude's commands for starting the servers. It stays out of git through `.git/info/exclude`.
 - When the Browser pane in the Claude desktop app is hidden, screenshots fail but reading page text works.
 - The owner has no automated checks on GitHub, so a PR shows no CI results. Tests run locally.
-- Known limitations for the final README:
-  - Name sorting ignores case for English letters only, because SQLite's `lower()` handles ASCII alone. Accented names sort after Z.
-  - Two simultaneous requests can both pass the double-booking check, because it runs before the save and the database doesn't enforce it. A reviewer double-booked 4 of 10 slots this way. A partial unique index on `(staff_id, scheduled_at)` would fix it, which is more than one office needs.
-  - A completed job can't be moved onto a time when the staff member has an open job, although that wouldn't create two open jobs. It's rare and harms no data.
+- Known limitations are in the README. In one test, simultaneous requests double-booked 4 of 10 slots.
+- The README is written in the owner's voice and leaves out AI by the owner's choice, while this file records how the work was done.
