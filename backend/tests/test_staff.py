@@ -65,13 +65,17 @@ def test_unknown_staff_member_returns_404(client, staff_id):
 
 def test_edit_staff_changes_their_details(client):
     created = add_staff(client)
-    changes = {"name": "Sam Khan", "role": "Maintenance Engineer", "phone": "0113 496 0002"}
+    changes = {
+        "name": "Sam Khan",
+        "role": "Maintenance Engineer",
+        "phone": "0113 496 0002",
+        "is_active": True,
+    }
 
     response = client.put(f"/api/staff/{created['id']}", json=changes)
 
     assert response.status_code == 200
-    stored = client.get(f"/api/staff/{created['id']}").json()
-    assert stored == {**changes, "id": created["id"], "is_active": True}
+    assert client.get(f"/api/staff/{created['id']}").json() == {**changes, "id": created["id"]}
 
 
 def test_staff_member_can_be_marked_inactive_and_active_again(client):
@@ -86,19 +90,35 @@ def test_staff_member_can_be_marked_inactive_and_active_again(client):
 
 
 def test_inactive_staff_member_stays_in_the_list(client):
-    add_staff(client, is_active=False)
+    created = add_staff(client)
+    client.put(f"/api/staff/{created['id']}", json={**VALID_STAFF, "is_active": False})
 
-    assert len(client.get("/api/staff").json()) == 1
+    assert [staff["is_active"] for staff in client.get("/api/staff").json()] == [False]
+
+
+def test_edit_staff_needs_the_active_flag_and_changes_nothing_without_it(client):
+    created = add_staff(client)
+    client.put(f"/api/staff/{created['id']}", json={**VALID_STAFF, "is_active": False})
+
+    response = client.put(f"/api/staff/{created['id']}", json=VALID_STAFF)
+
+    assert response.status_code == 422
+    assert "is_active" in response.json()["errors"]
+    assert client.get(f"/api/staff/{created['id']}").json()["is_active"] is False
 
 
 def test_edit_staff_rejects_invalid_input_and_changes_nothing(client):
     created = add_staff(client)
 
-    response = client.put(f"/api/staff/{created['id']}", json={**VALID_STAFF, "name": ""})
+    response = client.put(
+        f"/api/staff/{created['id']}", json={**VALID_STAFF, "is_active": True, "name": ""}
+    )
 
     assert response.json()["errors"] == {"name": "Name is required."}
     assert client.get(f"/api/staff/{created['id']}").json() == created
 
 
 def test_edit_unknown_staff_member_returns_404(client):
-    assert client.put("/api/staff/999", json=VALID_STAFF).status_code == 404
+    response = client.put("/api/staff/999", json={**VALID_STAFF, "is_active": True})
+
+    assert response.status_code == 404

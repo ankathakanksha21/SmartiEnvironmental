@@ -73,11 +73,14 @@ class CustomerOut(BaseModel):
     onboarding_status: OnboardingStatus
 
 
-class StaffDetails(RequestBody):
+class StaffCreate(RequestBody):
     name: RequiredText
     role: StaffRole
     phone: Phone
-    is_active: bool = True
+
+
+class StaffDetails(StaffCreate):
+    is_active: bool
 
 
 class StaffOut(BaseModel):

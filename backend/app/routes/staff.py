@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session
 
 from app.database import get_db
 from app.models import Staff
-from app.schemas import StaffDetails, StaffOut
+from app.schemas import StaffCreate, StaffDetails, StaffOut
 
 router = APIRouter(prefix="/api/staff", tags=["Staff"])
 
@@ -24,8 +24,8 @@ def list_staff(db: Session = Depends(get_db)):
 
 
 @router.post("", response_model=StaffOut, status_code=201)
-def create_staff(details: StaffDetails, db: Session = Depends(get_db)):
-    staff = Staff(**details.model_dump())
+def create_staff(new_staff: StaffCreate, db: Session = Depends(get_db)):
+    staff = Staff(**new_staff.model_dump(), is_active=True)
     db.add(staff)
     db.commit()
     return staff

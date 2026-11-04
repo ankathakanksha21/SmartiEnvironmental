@@ -7,8 +7,8 @@ Give a fresh session this file and the code, and it can continue without anythin
 - **Step we're in:** 4 of 7, building. `staff` is the third of four branches.
 - **On main:** the design, the running skeleton, and customers with onboarding status.
 - **Working branch:** `staff`.
-- **Open PR:** none yet.
-- **Next:** review `staff`, raise its PR, and start `jobs` after the owner merges it.
+- **Open PR:** [#4](https://github.com/ankathakanksha21/SmartiEnvironmental/pull/4), `staff`, waiting for the owner to merge it.
+- **Next:** after that merge, `jobs` starts from an up-to-date main.
 - **Deadline:** finish today, 4 November 2026.
 
 ### Plan
@@ -192,9 +192,9 @@ A page calls `api.js`, which calls a FastAPI route. FastAPI validates the reques
 | `GET /api/staff/{id}` | View one |
 | `PUT /api/staff/{id}` | Edit name, role, phone, active flag |
 
-- The code follows the same pattern as customers: `routes/staff.py`, `Staff` in `models.py`, `StaffDetails` and `StaffOut` in `schemas.py`.
+- The code follows the same pattern as customers: `routes/staff.py`, `Staff` in `models.py`, `StaffCreate`, `StaffDetails` and `StaffOut` in `schemas.py`.
 - Pages: `StaffList`, `StaffDetail`, `StaffNew`, `StaffEdit`. The last two share `StaffForm`.
-- There is no delete. Unticking **Active** on the edit form is how someone leaves the booking list.
+- There is no delete. Unticking **Active** on the edit form marks someone inactive. Nothing reads the flag yet, and the `jobs` branch uses it to leave them off the booking list.
 
 **One request traced: adding a customer**
 1. `CustomerNew.jsx` calls `request('/customers', { method: 'POST', body: values })` when the form is submitted.
@@ -209,6 +209,10 @@ A page calls `api.js`, which calls a FastAPI route. FastAPI validates the reques
 **The design comparison stalled.** The planned comparison had three stages: prototypes, three independent designs, then critics. The prototype step stopped making progress at 17:08, and Claude didn't notice until the owner asked for status at 18:25. The cause is unknown. Claude stopped the run, used the evidence already on disk, and wrote the design directly. The independent designs and critics never ran, so each PR gets a review instead. This cost about 75 minutes.
 
 **The API stopped working in the browser after a branch switch.** Pages said "Something went wrong" and `/api/customers` through Vite returned HTML, although the backend answered correctly on its own. Vite's log showed `git checkout` had rewritten `vite.config.js`, and the automatic restart that followed lost the proxy. Restarting `npm run dev` fixed it, and the README now says so.
+
+**Problems the `staff` review found**
+- An API edit that left out `is_active` turned an inactive person active and returned 200. The add form's default also applied to edits. `StaffCreate` now holds the add fields, and `StaffDetails` requires the flag, so that edit now returns 422.
+- The first commit message on `staff` says unticking Active takes someone off the booking list. That only becomes true in `jobs`. We left the commit as it is, because rewriting it would need a force-push, and recorded the correct behaviour in section 6 and the PR.
 
 **Problems the `customers` review found**
 - Data loss: jumping through browser history between two edit pages left the first customer's values in the form, and saving overwrote the second customer with them. `useApi` now goes back to loading when the URL changes.
@@ -236,7 +240,7 @@ A page calls `api.js`, which calls a FastAPI route. FastAPI validates the reques
 **How to test:** follow [README.md](README.md). Run `pytest` in `backend`, and `npm run lint` and `npm run build` in `frontend`.
 
 **Latest results, on `staff`**
-- `pytest`: 56 passed on Python 3.11.
+- `pytest`: 57 passed on Python 3.11.
 - `npm run lint` is clean, and `npm run build` succeeds.
 - The frontend has no automated tests. Its pages get checked in the browser.
 
@@ -245,6 +249,7 @@ A page calls `api.js`, which calls a FastAPI route. FastAPI validates the reques
 - A valid staff member saved as Active, and the add form has no active checkbox.
 - The edit form showed Active ticked. Unticking it and saving changed the status to Inactive.
 - The list showed both staff in name order with their status.
+- After the review fix, adding someone still saved them as Active, and editing the phone of an inactive person kept them Inactive.
 
 **Browser check of the customer pages**
 - Saving a blank form showed an error under each required field.
@@ -292,7 +297,7 @@ The owner chose an ORM and asked how the folders and code were planned. Claude p
 
 **Step 4, `customers`.** Claude built the customer API, validation rules and tests, then the React pages, and checked each flow in the browser. Two independent reviewers found a data-loss bug and some weak tests, and Claude fixed them (section 7). The owner merged the PR.
 
-**Step 4, `staff`.** Claude built the staff API, tests and pages, following the customer pattern, and checked each flow in the browser.
+**Step 4, `staff`.** Claude built the staff API, tests and pages, following the customer pattern, and checked each flow in the browser. Two independent reviewers found that an API edit could reactivate someone by accident, and Claude fixed it. While the review ran, the owner asked for the workflow as a flow chart, and Claude drew three: how a save moves through the app, how office staff use the CRM, and how each feature gets built.
 
 ## 10. How to continue
 
