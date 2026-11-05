@@ -1,6 +1,6 @@
 # Handoff
 
-**This file is for Claude Code or any other AI coding tool.** To change the app, give the tool this repo. `CLAUDE.md` sends Claude Code here, and any other tool can be asked to read this file. It summarises the sessions so far, so the tool can continue without anything being re-explained. Start at section 10.
+**This file is for Claude Code or any other AI coding tool.** To change the app, give the tool this repo and ask it to read this file. It summarises the sessions so far, so the tool can continue without anything being re-explained. Start at section 10.
 
 It holds the current status and plan, the brief, the working rules, each decision with its reason, a code guide, challenges, test results and session summaries.
 
@@ -10,10 +10,10 @@ Developers don't need to read it unless they want every detail. [README.md](READ
 
 ## 1. Current status
 
-- **Step we're in:** The last one, step 11. Everything is finished once PR #13 is merged.
-- **On main:** All of brief sections A to D, the sample data, the final README, the Smarti-branded design, the six additions that connect the steps into one journey (section 4) and the summary PDF. PR #13 adds the README's section on AI-assisted development.
-- **Open PR:** #13, on `ai-development-docs`, until the owner merges it.
-- **Next:** The owner merges PR #13, tries the app, hands in the code and `Smarti_CRM_Summary.pdf`, gives the assessor access to the private repo, and presents the work. New work starts only if the owner asks.
+- **Step we're in:** The last one, step 12. Everything is finished once PR #14 is merged.
+- **On main:** All of brief sections A to D, the sample data, the final README with its section on AI-assisted development, the Smarti-branded design, the six additions that connect the steps into one journey (section 4) and the summary PDF.
+- **Open PR:** #14, on `remove-claude-md`, until the owner merges it.
+- **Next:** The owner merges PR #14, tries the app, hands in the code and `Smarti_CRM_Summary.pdf`, gives the assessor access to the private repo, and presents the work. New work starts only if the owner asks.
 
 ### Plan
 
@@ -28,6 +28,7 @@ Developers don't need to read it unless they want every detail. [README.md](READ
 - [x] 9. Connect the steps into one workflow, on `connected-workflow`, after the owner's cross-check
 - [x] 10. Shorten the README's challenges and make the summary PDF, on `summary-and-readme`
 - [x] 11. Add the README's section on AI-assisted development and this file's opening note, on `ai-development-docs`
+- [x] 12. Remove the one-line pointer file, on `remove-claude-md`
 
 ## 2. Project summary and checklist
 
@@ -117,6 +118,7 @@ Everything in brief sections A to D got built, and main worked after every merge
 | 8 | `connected-workflow` | The six additions above | The owner approved them after a cross-check. They build on every finished feature. |
 | 9 | `summary-and-readme` | The summary PDF and a shorter challenges list | The owner asked for them after the features, because both describe the finished work. |
 | 10 | `ai-development-docs` | The README's section on AI-assisted development, and this file's opening note | The owner asked for them so another developer can follow the same method and continue the work. |
+| 11 | `remove-claude-md` | Removed a one-line pointer file | The owner asked, because it held no information of its own. |
 
 **Left out on purpose**
 - Deleting records. The brief doesn't ask for it, and keeping records protects job history.
@@ -167,7 +169,7 @@ Everything in brief sections A to D got built, and main worked after every merge
 | Challenges in the README | All of them, or the strongest few | Three: choosing the stack, the edit form saving the wrong record, and keeping an automatic status correct | The owner asked for the three that best show decision making and problem solving. These cover a choice tested with prototypes, a data-loss bug fixed at its cause, and a business rule where two things can change one field. Section 7 of this file keeps the rest. |
 | Frontend tests in the README's limitations | Keep the line, or remove it | Removed | The owner's choice. Section 8 of this file still says the frontend has no automated tests. |
 | Summary PDF | Outside the repo, or committed | Committed at the repo root as `Smarti_CRM_Summary.pdf` | The owner tracks everything in GitHub, and the same file can be handed in separately. It's in the owner's voice and doesn't mention AI. |
-| Starting a new session | Tell it to read this file, or add a `CLAUDE.md` | A short `CLAUDE.md` that points here | Claude Code loads `CLAUDE.md` by itself, so a new developer only has to open the repo. A fresh-session test showed that the rules otherwise depend on someone saying to read this file. |
+| Starting a new session | Tell it to read this file, or add a `CLAUDE.md` that points here | Tell it to read this file | The owner's choice. A `CLAUDE.md` was added and then removed, because it held one line and no information of its own. The README's example prompt does the same job. |
 
 ## 6. Code guide
 
@@ -351,7 +353,7 @@ The first commit message on `staff` says unticking Active takes someone off the 
 
 **Results on `summary-and-readme`:** This branch changes only the docs and adds the PDF, so the code results above still stand. `Smarti_CRM_Summary.pdf` is one A4 page of 193 words, counting its title and headings. A fact-checker found three claims in the first drafts that overstated the evidence or were wrong, and a cold reader found unclear wording. Claude fixed these. They were that "chose the stack from evidence" implied React and SQLite were compared, that the PostgreSQL move was stated as fact, and that "only a booking or a move" ignored completing a job.
 
-**Results on `ai-development-docs`:** This branch changes only the docs and adds `CLAUDE.md`, so the code results above still stand. A brand-new session with no other context was given the README's example prompt. It reported the project's status and rules correctly, planned a Cancelled status file by file, and came back with questions for the developer. Its gaps led to `CLAUDE.md`, the note on who takes the owner's place, the definition of an open job and the steps for a scratch copy. A fact-checker also corrected lines that overstated the record. A second new session, given only the repo and the same request, found `CLAUDE.md` by itself, read this file, took the owner's place correctly and planned the work. Its smaller findings are fixed too.
+**Results on `ai-development-docs`:** This branch changes only the docs, so the code results above still stand. A brand-new session with no other context was given the README's example prompt. It reported the project's status and rules correctly, planned a Cancelled status file by file, and came back with questions for the developer. Its gaps led to the note on who takes the owner's place, the definition of an open job and the steps for a scratch copy. A fact-checker also corrected lines that overstated the record. A second new session read this file, took the owner's place correctly and planned the work. Its smaller findings are fixed too.
 
 **Demo script**
 
@@ -445,7 +447,7 @@ Claude suggested six additions and offered a duplicate check as a seventh. The o
 
 **After the plan, `summary-and-readme`.** The owner asked to cut the README's challenges to the three that best show decision making and problem solving, to drop the limitation about frontend tests, and for the assessment's other deliverable, a summary of at most 200 words in a separate PDF. Claude chose the three and sharpened their wording, wrote the summary in the owner's voice, and built the PDF. Two reviewers then checked the facts and the clarity (section 8).
 
-**After the plan, `ai-development-docs`.** The owner asked for a README section on AI-assisted development, covering how the work went step by step, example prompts, the practices used, how a new developer continues with Claude, and who does what. They also asked for a short note at the start of this file, and a line for stakeholders if it fit naturally. Claude wrote these and put the stakeholder line under the README's opening description. The README's prompts are reworded examples. A brand-new session then tested the docs, and what it found led to `CLAUDE.md` and the fixes in section 8.
+**After the plan, `ai-development-docs`.** The owner asked for a README section on AI-assisted development, covering how the work went step by step, example prompts, the practices used, how a new developer continues with Claude, and who does what. They also asked for a short note at the start of this file, and a line for stakeholders if it fit naturally. Claude wrote these and put the stakeholder line under the README's opening description. The README's prompts are reworded examples. A brand-new session then tested the docs, and what it found led to the fixes in section 8. The owner later asked to remove a one-line pointer file that held no information of its own (section 5).
 
 ## 10. How to continue
 
