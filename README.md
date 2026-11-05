@@ -326,19 +326,9 @@ Each step had its own branch and pull request, and main worked after every merge
 
 ### Challenges
 
-- **Choosing the stack without guessing.** I built the same small feature in four stacks and compared lines of code, packages and the problems each one hit. An ORM saved little code at this size (98 lines against 107), but I chose SQLAlchemy for the easier move to PostgreSQL. The prototypes also showed that SQLModel's table models don't validate.
-- **Foreign keys.** SQLite ignores them by default and stored a job for a customer that didn't exist. `database.py` now turns them on for every connection.
-- **An edit form saving the wrong record.** Jumping through browser history between two edit pages kept the first customer's values in the form, and saving overwrote the second customer. `useApi` now goes back to loading when the URL changes, which removes the old form.
-- **Accidentally reactivating staff.** An API edit that left out `is_active` used the add form's default and turned an inactive person active. Editing now requires the flag.
-- **Double booking.** Comparing times isn't enough, because 09:30:00 and 09:30:59 look different, so the API drops seconds. Reopening a completed job could also recreate a clash, so that path checks too.
-- **Tests that proved too little.** An early test still passed with its database call deleted, and the phone tests passed with a rule removed. I found these by breaking the code on purpose, and rewrote them.
-- **A date typed straight through.** In Chrome, typing a date with no Tab can send a six-digit year, and the form showed a raw technical message. The API now reads the date itself and says "Enter a valid date and time."
-- **The API breaking after a branch switch.** `git checkout` rewrote `vite.config.js`, and Vite's automatic restart lost the proxy. Restarting `npm run dev` fixes it, and step 2 above says so.
-- **A busy reloader.** `uvicorn --reload` scanned every file in `.venv` and used about 64% of a CPU core. `--reload-dir app` cut that to about 1%.
-- **Keeping an automatic status correct.** Onboarding now changes when a job changes, so a refused booking or edit must leave the customer alone. My first version also re-ran the rule on every job edit, which overwrote a status set by hand. The route now moves a customer out of New Enquiry only after every check has passed, and only when a job is booked for them or moved to them. Tests cover both.
-- **Success messages coming back.** My first version kept the message in the browser's history, so a reload or the Back button showed it again, and a slow status save could pull you back to the page you had left. `Layout.jsx` now holds the message in React state, so a reload or Back can't bring it back, and a slow status save can't move you.
-- **A message nobody saw.** On a phone, the status form sits low on the page, so a message at the top appeared and cleared off-screen. It now stays fixed at the bottom of the screen.
-- **Scripted clicks reading too early.** The URL changes a moment before React redraws, and two pages share a status control, so my first browser script read the old page and reported failures. It now waits for the next page's heading.
+- **Choosing the stack without guessing.** I built the same small feature in four backend stacks (FastAPI with written SQL, SQLAlchemy or SQLModel, and Flask with written SQL) and compared lines of code, packages and the problems each one hit. Flask was the smallest (86 lines against FastAPI's 107), but I chose FastAPI because its JSON responses, request checking and `/docs` page suit a React frontend. An ORM saved little code (98 lines against 107), but I chose SQLAlchemy because, according to its docs, it makes a later move to PostgreSQL easier if the app is ever hosted for several users. The prototypes ruled out SQLModel, which promises one class for both the table and its validation, because its table models stored blank names and bad emails with no error. They also showed that SQLite ignores foreign keys by default and stored a job for a customer that didn't exist, so `database.py` turns them on for every connection.
+- **An edit form saving the wrong record.** Jumping through browser history between two edit pages kept the first customer's values in the form, and saving overwrote the second customer. I fixed the cause in the shared `useApi` hook, which now goes back to loading when the URL changes. That removes the old form, and every edit page gets the fix because they all load through this hook.
+- **Keeping an automatic status correct.** Onboarding status follows the jobs, and the office can still set it by hand, so two things can change one field. My first version re-ran the rule on every job edit, which overwrote a status set by hand. I decided that only a new booking, or a job moved to another customer, should move someone from New Enquiry to In Progress, and that a refused request should change nothing. Tests cover this, and breaking each rule on purpose made a test fail.
 
 ### Known limitations
 
@@ -355,7 +345,6 @@ Each step had its own branch and pull request, and main worked after every merge
 - **Table changes need a fresh database.** There are no migrations, and the app only creates missing tables.
 - **Name order.** Accented names sort after Z, because SQLite's `lower()` only handles English letters.
 - **No duplicate check.** Two customers can have the same name and phone number.
-- **No automated frontend tests.** I checked the pages in a real browser instead.
 
 ### How I tested it
 

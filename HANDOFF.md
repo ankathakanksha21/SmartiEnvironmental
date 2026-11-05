@@ -4,10 +4,10 @@ Give a fresh session this file and the code, and it can continue without anythin
 
 ## 1. Current status
 
-- **Step we're in:** Finished. All 9 steps below are done.
-- **On main:** All of brief sections A to D, the sample data, the final README, the Smarti-branded design and the six additions that connect the steps into one journey (section 4).
-- **Open PR:** None.
-- **Next:** The owner tries the app, gives the assessor access to the private repo, and presents the work. New work starts only if the owner asks.
+- **Step we're in:** The last one, step 10. Everything is finished once PR #12 is merged.
+- **On main:** All of brief sections A to D, the sample data, the final README, the Smarti-branded design and the six additions that connect the steps into one journey (section 4). PR #12 adds the summary PDF.
+- **Open PR:** #12, on `summary-and-readme`, until the owner merges it.
+- **Next:** The owner merges PR #12, tries the app, hands in the code and `Smarti_CRM_Summary.pdf`, gives the assessor access to the private repo, and presents the work. New work starts only if the owner asks.
 
 ### Plan
 
@@ -20,6 +20,7 @@ Give a fresh session this file and the code, and it can continue without anythin
 - [x] 7. Owner merges the last PR
 - [x] 8. Design refresh the owner asked for, on `ui-design`
 - [x] 9. Connect the steps into one workflow, on `connected-workflow`, after the owner's cross-check
+- [x] 10. Shorten the README's challenges and make the summary PDF, on `summary-and-readme`
 
 ## 2. Project summary and checklist
 
@@ -52,6 +53,7 @@ This table is the brief, with the state of each item.
 | README: technologies and why, app and database structure, how components interact, alternatives, what would change with more time | reviewed |
 | README: build order, challenges and fixes, limitations, how it was tested | reviewed |
 | README: explains the feature prioritisation | reviewed |
+| Summary of at most 200 words in a separate PDF: what was built, what the author is most pleased with, what they would improve next | done, `Smarti_CRM_Summary.pdf` |
 
 The six additions on `connected-workflow` go beyond this table, and the owner approved them (section 4).
 
@@ -104,6 +106,7 @@ Everything in brief sections A to D got built, and main worked after every merge
 | 6 | `demo-and-docs` | Sample data, demo run, final README | The docs describe the finished app. |
 | 7 | `ui-design` | Smarti's colours, font and cards | The owner asked for it after trying the app. It changes no behaviour. |
 | 8 | `connected-workflow` | The six additions above | The owner approved them after a cross-check. They build on every finished feature. |
+| 9 | `summary-and-readme` | The summary PDF and a shorter challenges list | The owner asked for them last, because both describe the finished work. |
 
 **Left out on purpose**
 - Deleting records. The brief doesn't ask for it, and keeping records protects job history.
@@ -151,6 +154,9 @@ Everything in brief sections A to D got built, and main worked after every merge
 | Where this file lives | Committed, or local only | Committed to the repo root | It's backed up, and a fresh session gets it with one clone. It holds no prompts. |
 | AI attribution lines | Keep, or remove | Removed | The owner's choice. |
 | AI mention in the README | One line, or none | None | The owner's choice. |
+| Challenges in the README | All of them, or the strongest few | Three: choosing the stack, the edit form saving the wrong record, and keeping an automatic status correct | The owner asked for the three that best show decision making and problem solving. These cover a choice tested with prototypes, a data-loss bug fixed at its cause, and a business rule where two things can change one field. Section 7 of this file keeps the rest. |
+| Frontend tests in the README's limitations | Keep the line, or remove it | Removed | The owner's choice. Section 8 of this file still says the frontend has no automated tests. |
+| Summary PDF | Outside the repo, or committed | Committed at the repo root as `Smarti_CRM_Summary.pdf` | The owner tracks everything in GitHub, and the same file can be handed in separately. It's in the owner's voice and leaves out AI, like the README. |
 
 ## 6. Code guide
 
@@ -254,6 +260,8 @@ Pages: `StaffList`, `StaffDetail`, `StaffNew`, `StaffEdit`. The last two share `
 
 ## 7. Challenges
 
+The README lists only the three challenges the owner chose (section 5). This section keeps the full record.
+
 **The design comparison stalled.** The planned comparison had three stages: prototypes, three independent designs, then critics. The prototype step stopped making progress at 17:08, and Claude didn't notice until the owner asked for status at 18:25. The cause is unknown. Claude stopped the run, used the evidence already on disk, and wrote the design directly. The independent designs and critics never ran, so each code branch got a review instead. This cost about 75 minutes.
 
 **Nobody had seen the pages.** The Browser pane in the Claude desktop app stayed hidden, so screenshots failed and clicks sometimes failed too. Page checks read the text and called `click()` from JavaScript, which proves behaviour but not appearance. On `demo-and-docs`, headless Chrome took real screenshots, and the pages looked right on desktop. Dates wrapped onto five lines in a narrow window, so Claude stopped that column wrapping.
@@ -329,6 +337,8 @@ The first commit message on `staff` says unticking Active takes someone off the 
 
 **Results on `connected-workflow`:** `pytest` 133 passed, `npm run lint` clean, `npm run build` succeeds. On a scratch copy, three throwaway Playwright scripts ran with real clicks. The journey below passed 50 checks, the whole app passed 49, and an empty database passed 6. Screenshots of 12 pages or states at 1280px and 390px wide showed no sideways scrolling and no console errors. A fresh clone of the branch from GitHub passed `pytest`, lint and the build, and left `git status` clean. Breaking each onboarding rule on purpose made a test fail, six breaks out of six. A docs reader followed the README's journey with real clicks, and every step matched.
 
+**Results on `summary-and-readme`:** This branch changes only the docs and adds the PDF, so the code results above still stand. `Smarti_CRM_Summary.pdf` is one A4 page of 193 words, counting its title and headings. A fact-checker found three claims in the first drafts that overstated the evidence or were wrong, and a cold reader found unclear wording. Claude fixed these. They were that "chose the stack from evidence" implied React and SQLite were compared, that the PostgreSQL move was stated as fact, and that "only a booking or a move" ignored completing a job.
+
 **Demo script**
 
 Start both servers, add the sample data, and open http://localhost:5173. Every step passed using scripted clicks on the real pages, on a fresh clone for `demo-and-docs` and on a scratch copy for `connected-workflow`.
@@ -383,7 +393,7 @@ Start both servers, add the sample data, and open http://localhost:5173. Every s
 
 ## 9. Session summaries
 
-### Session 1, 4 November 2026
+### Session 1, 4 and 5 November 2026
 
 **Step 1, understanding.** The owner shared the brief and asked for a guided, step-by-step build, with the approach and documentation as the priorities. Claude checked the machine and GitHub, found a private, empty repo with admin access, and asked four questions.
 
@@ -419,6 +429,8 @@ The owner also asked whether the app should be designed around what each kind of
 
 Claude suggested six additions and offered a duplicate check as a seventh. The owner chose the six. Claude built them on one branch and tested them with real clicks on a scratch copy, so the owner's data stayed untouched. Independent reviewers then checked the branch (section 7). The owner merged the PR, and Claude confirmed that main passes `pytest`, lint and the build.
 
+**After the plan, `summary-and-readme`.** The owner asked to cut the README's challenges to the three that best show decision making and problem solving, to drop the limitation about frontend tests, and for the assessment's other deliverable, a summary of at most 200 words in a separate PDF. Claude chose the three and sharpened their wording, wrote the summary in the owner's voice, and built the PDF. Two reviewers then checked the facts and the clarity (section 8).
+
 ## 10. How to continue
 
 1. Read section 1, then section 3.
@@ -450,3 +462,4 @@ Claude suggested six additions and offered a duplicate check as a seventh. The o
 - The repo has no automated checks on GitHub, so a PR shows no CI results. Tests run locally.
 - Known limitations are in the README. In testing, simultaneous requests double-booked 4 of 10 slots in one run and 8 of 10 in another.
 - The README is written in the owner's voice and leaves out AI by the owner's choice, while this file records how the work was done.
+- `Smarti_CRM_Summary.pdf` was built from a throwaway HTML page with headless Chrome, using the Poppins files in `frontend/node_modules`. To change it, rebuild it the same way and keep it to 200 words. `pdftoppm` isn't installed here, so `pypdfium2` in a scratch folder can render a page to check how it looks.
