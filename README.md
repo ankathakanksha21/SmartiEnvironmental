@@ -2,6 +2,8 @@
 
 A simple web-based CRM for a business that manages customers, appointments, fitters and maintenance engineers. Office staff use it to add customers, track their onboarding, book jobs, assign them to staff and follow their progress.
 
+Stakeholders, including people who don't code, can follow this project from this README without a detailed handover. Once the app is running with its sample data, [the try-it steps](#5-try-the-main-features) need only a browser.
+
 - [Getting started](#getting-started)
 - [Architecture and design decisions](#architecture-and-design-decisions)
 - [Development process](#development-process)
@@ -283,12 +285,12 @@ The ORM writes the SQL. To see it in the terminal, set `CRM_ECHO_SQL` before sta
 
 ### How to continue developing it
 
-- **Add a status.** Add it to the list in `schemas.py`, the list in `constants.js`, and a badge colour in `style.css`.
+- **Add a status.** Add it to the list in `schemas.py`, the list in `constants.js`, and a badge colour in `style.css`. A new job status also needs a decision on whether it counts as open, because the code treats every job status except Completed as open. `HANDOFF.md` section 6 lists where.
 - **Add a field.** Add it to the class in `models.py`, the classes in `schemas.py`, the form, the pages that show it and `seed.py`. There are no migrations yet, so delete `backend/crm.db` to rebuild the tables.
 - **Add a feature.** Add a table class, schemas, a file in `routes/` included from `main.py`, pages listed in `main.jsx`, a header link in `Layout.jsx`, and a test file.
 - **Show a success message.** Get `showMessage` from `useOutletContext()` and call `showMessage('Saved.')`. `Layout.jsx` shows it for five seconds.
 
-`HANDOFF.md` has the full decision log, a code guide and notes for picking the work up. Its section 2 lists the brief.
+`HANDOFF.md` has the full decision log, a code guide and notes for picking the work up. Its section 2 lists the brief. To continue with an AI coding tool, see [AI-assisted development](#ai-assisted-development-with-claude-code).
 
 ## Development process
 
@@ -323,6 +325,56 @@ Each step had its own branch and pull request, and main worked after every merge
 | 6 | `demo-and-docs` | Sample data, demo run, this README | The docs describe the finished app. |
 | 7 | `ui-design` | Smarti's colours, font and cards | It changes no behaviour, so it came after the features worked. |
 | 8 | `connected-workflow` | The six additions under Prioritisation | They build on every finished feature. |
+
+### AI-assisted development with Claude Code
+
+I built this app with [Claude Code](https://claude.com/claude-code), Anthropic's coding tool, so "I" in this README often means Claude working under my direction. The next developer can work the same way or choose their own.
+
+**How we worked, step by step**
+
+1. **Questions first.** Before any code, Claude asked me questions until we agreed on what to build and how to work.
+2. **Design next.** Claude built small prototypes and recommended options with reasons. I made or approved each decision, and it went into `HANDOFF.md`.
+3. **One working feature at a time.** Each feature got its own branch. Claude built and tested it, separate Claude agents reviewed it, and Claude raised a pull request. I merged it, and the next feature started from the updated main.
+4. **My own checks.** I tried the app and checked it against Smarti's website and how an office would use it. That caught a redesign that missed Smarti's brand, and steps that weren't connected, which led to the six additions under Prioritisation.
+
+**Prompts like these drove each step.** I've reworded them.
+
+| Step | Prompt |
+|---|---|
+| Start | "Here's the brief. Ask me about anything unclear until we agree. Don't assume." |
+| Design | "Compare these options by building them. Recommend one and give your reasons." |
+| Build | "Build customers on a new branch and test it. Tell me when it's ready to merge." |
+| Review | "Have a separate agent review this branch for bugs and over-complication." |
+| Cross-check | "Does this work as one connected workflow? Answer honestly and suggest minimal additions." |
+
+**The rules and practices I used.** `HANDOFF.md` section 3 has the full list.
+
+- Ask instead of assuming, and give a reason for every recommendation.
+- Take the minimal path, with no temporary fixes, and no features beyond the brief unless I approve them.
+- Only I merge, and the next feature waits for that merge.
+- Test with scripted clicks on a scratch copy, so real data stays safe.
+- Update `HANDOFF.md` on every branch before asking to merge.
+- Use the [`no-ai-slop`](https://github.com/petergyang/no-ai-slop) skill for documents, comments, commit messages and pull requests, which keeps the writing plain.
+
+**To continue with Claude Code**
+
+1. Clone the repo and open it in Claude Code. Install the `no-ai-slop` skill if you want the same writing style.
+2. Say what you want, such as "Tell me where the project stands, then help me add a Cancelled job status."
+3. Answer its questions, try the result, and merge its pull request.
+
+This works because `CLAUDE.md` sends a new session straight to `HANDOFF.md`, which gives it the brief, the rules, each decision with its reason, a code guide and past problems, so you don't re-explain anything. Claude updates the file on each branch, so the next session picks up where this one stopped. You take my place as the owner in that file.
+
+You don't need to read that file to stay in the loop. This README covers what was built, why and how, each pull request says what changed and how it was tested, and Claude can explain any decision or piece of code when you ask.
+
+**Who does what**
+
+| The developer | Claude |
+|---|---|
+| Sets the goal and the rules | Asks questions until the goal is clear |
+| Makes the decisions | Recommends options, with reasons |
+| Tries the app and says what's wrong | Writes the code, tests and docs, and runs the checks |
+| Merges each pull request | Raises it and says when it's ready |
+| Understands and presents the work | Keeps `HANDOFF.md` current, and explains anything on request |
 
 ### Challenges
 

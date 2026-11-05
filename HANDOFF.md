@@ -1,13 +1,19 @@
 # Handoff
 
-Give a fresh session this file and the code, and it can continue without anything being re-explained. Setup steps, the code layout and the database diagram live only in [README.md](README.md). "The owner" below means the repo owner, ankathakanksha21.
+**This file is for Claude Code or any other AI coding tool.** To change the app, give the tool this repo. `CLAUDE.md` sends Claude Code here, and any other tool can be asked to read this file. It summarises the sessions so far, so the tool can continue without anything being re-explained. Start at section 10.
+
+It holds the current status and plan, the brief, the working rules, each decision with its reason, a code guide, challenges, test results and session summaries.
+
+Developers don't need to read it unless they want every detail. [README.md](README.md) explains what was built, why and how, and holds the setup steps, the code layout and the database diagram.
+
+"The owner" below means the repo owner, ankathakanksha21. A developer who continues this work takes the owner's place in sections 1 and 3, and commits under their own git identity.
 
 ## 1. Current status
 
-- **Step we're in:** The last one, step 10. Everything is finished once PR #12 is merged.
-- **On main:** All of brief sections A to D, the sample data, the final README, the Smarti-branded design and the six additions that connect the steps into one journey (section 4). PR #12 adds the summary PDF.
-- **Open PR:** #12, on `summary-and-readme`, until the owner merges it.
-- **Next:** The owner merges PR #12, tries the app, hands in the code and `Smarti_CRM_Summary.pdf`, gives the assessor access to the private repo, and presents the work. New work starts only if the owner asks.
+- **Step we're in:** The last one, step 11. Everything is finished once PR #13 is merged.
+- **On main:** All of brief sections A to D, the sample data, the final README, the Smarti-branded design, the six additions that connect the steps into one journey (section 4) and the summary PDF. PR #13 adds the README's section on AI-assisted development.
+- **Open PR:** #13, on `ai-development-docs`, until the owner merges it.
+- **Next:** The owner merges PR #13, tries the app, hands in the code and `Smarti_CRM_Summary.pdf`, gives the assessor access to the private repo, and presents the work. New work starts only if the owner asks.
 
 ### Plan
 
@@ -21,6 +27,7 @@ Give a fresh session this file and the code, and it can continue without anythin
 - [x] 8. Design refresh the owner asked for, on `ui-design`
 - [x] 9. Connect the steps into one workflow, on `connected-workflow`, after the owner's cross-check
 - [x] 10. Shorten the README's challenges and make the summary PDF, on `summary-and-readme`
+- [x] 11. Add the README's section on AI-assisted development and this file's opening note, on `ai-development-docs`
 
 ## 2. Project summary and checklist
 
@@ -79,15 +86,17 @@ These come from the owner and apply to every session.
 - Within that minimal path, aim for the best approach and the best decisions.
 - Work through new decisions with the owner, and give the reasoning behind each one. The decisions in section 5 are settled.
 - If an instruction is unclear, ask instead of assuming.
+- Test anything that writes data on a scratch copy, so real data stays safe (section 11 says how).
 
 **Writing**
 - Keep documents short, clear and step by step.
 - Follow the `no-ai-slop` skill for documents, code comments, commit messages and PR text.
-- The README does not mention Claude or AI.
+- The README mentions Claude only in its section on AI-assisted development.
 - This file holds summaries, never the owner's prompts word for word.
 - Use they/them for people.
 - Setup steps live only in the README, and this file links to them.
 - Record notes, results and decisions in this file at every step, and bring it up to date on the branch before asking the owner to merge.
+- Write section 1 so it stays true after the merge, such as "finished once PR #13 is merged". The `final-status*` PRs (#7, #9 and #11) corrected it after merging, at the cost of an extra PR each time.
 
 ## 4. Feature priorities
 
@@ -106,7 +115,8 @@ Everything in brief sections A to D got built, and main worked after every merge
 | 6 | `demo-and-docs` | Sample data, demo run, final README | The docs describe the finished app. |
 | 7 | `ui-design` | Smarti's colours, font and cards | The owner asked for it after trying the app. It changes no behaviour. |
 | 8 | `connected-workflow` | The six additions above | The owner approved them after a cross-check. They build on every finished feature. |
-| 9 | `summary-and-readme` | The summary PDF and a shorter challenges list | The owner asked for them last, because both describe the finished work. |
+| 9 | `summary-and-readme` | The summary PDF and a shorter challenges list | The owner asked for them after the features, because both describe the finished work. |
+| 10 | `ai-development-docs` | The README's section on AI-assisted development, and this file's opening note | The owner asked for them so another developer can follow the same method and continue the work. |
 
 **Left out on purpose**
 - Deleting records. The brief doesn't ask for it, and keeping records protects job history.
@@ -153,10 +163,11 @@ Everything in brief sections A to D got built, and main worked after every merge
 | Customer's status on a job page | A badge beside the name, or a labelled line | A labelled line, "Onboarding status: In Progress" | The onboarding and job statuses share words such as In Progress, so an unlabelled badge read as the job's own status. |
 | Where this file lives | Committed, or local only | Committed to the repo root | It's backed up, and a fresh session gets it with one clone. It holds no prompts. |
 | AI attribution lines | Keep, or remove | Removed | The owner's choice. |
-| AI mention in the README | One line, or none | None | The owner's choice. |
+| AI mention in the README | None, or a section on how it was used | A section under Development process | The owner first chose none, then asked for the section, because another developer must be able to follow the docs and continue. |
 | Challenges in the README | All of them, or the strongest few | Three: choosing the stack, the edit form saving the wrong record, and keeping an automatic status correct | The owner asked for the three that best show decision making and problem solving. These cover a choice tested with prototypes, a data-loss bug fixed at its cause, and a business rule where two things can change one field. Section 7 of this file keeps the rest. |
 | Frontend tests in the README's limitations | Keep the line, or remove it | Removed | The owner's choice. Section 8 of this file still says the frontend has no automated tests. |
-| Summary PDF | Outside the repo, or committed | Committed at the repo root as `Smarti_CRM_Summary.pdf` | The owner tracks everything in GitHub, and the same file can be handed in separately. It's in the owner's voice and leaves out AI, like the README. |
+| Summary PDF | Outside the repo, or committed | Committed at the repo root as `Smarti_CRM_Summary.pdf` | The owner tracks everything in GitHub, and the same file can be handed in separately. It's in the owner's voice and doesn't mention AI. |
+| Starting a new session | Tell it to read this file, or add a `CLAUDE.md` | A short `CLAUDE.md` that points here | Claude Code loads `CLAUDE.md` by itself, so a new developer only has to open the repo. A fresh-session test showed that the rules otherwise depend on someone saying to read this file. |
 
 ## 6. Code guide
 
@@ -223,6 +234,7 @@ Pages: `StaffList`, `StaffDetail`, `StaffNew`, `StaffEdit`. The last two share `
 - `Job.is_overdue` in `models.py` is true when the time has passed and the status is still Pending.
 - `Job.customer` and `Job.staff` are SQLAlchemy relationships, and `JobOut` includes both records. `joinedload` in `list_jobs` fetches them in one query.
 - `JobsTable` loads its own data from a `path` prop, so the Overview, the jobs page, customer pages and staff pages all reuse it. A `limit` prop shows only the first few, and customer and staff names link to their pages.
+- An open job is any job that isn't Completed. A new job status needs a decision on whether it counts as open, and then changes in `has_clash`, the upcoming filter and `reopening` in `routes/jobs.py`, `openJob` in `CustomerNextStep.jsx`, `openJobsFor` in `Overview.jsx` and the Completed check in `JobDetail.jsx`. `test_update_job_status_rejects_an_unknown_status` uses "Cancelled" as its unknown status, so it needs another word if that status is added.
 - `JobForm` loads the customer and staff lists for its dropdowns. It keeps an inactive staff member as an option only if the job already has them.
 - A customer's **Book a job** button opens `/jobs/new?customer_id=1`, and `JobNew` starts with that customer selected. It also reads `description` from the URL, for follow-up visits.
 
@@ -339,6 +351,8 @@ The first commit message on `staff` says unticking Active takes someone off the 
 
 **Results on `summary-and-readme`:** This branch changes only the docs and adds the PDF, so the code results above still stand. `Smarti_CRM_Summary.pdf` is one A4 page of 193 words, counting its title and headings. A fact-checker found three claims in the first drafts that overstated the evidence or were wrong, and a cold reader found unclear wording. Claude fixed these. They were that "chose the stack from evidence" implied React and SQLite were compared, that the PostgreSQL move was stated as fact, and that "only a booking or a move" ignored completing a job.
 
+**Results on `ai-development-docs`:** This branch changes only the docs and adds `CLAUDE.md`, so the code results above still stand. A brand-new session with no other context was given the README's example prompt. It reported the project's status and rules correctly, planned a Cancelled status file by file, and came back with questions for the developer. Its gaps led to `CLAUDE.md`, the note on who takes the owner's place, the definition of an open job and the steps for a scratch copy. A fact-checker also corrected lines that overstated the record.
+
 **Demo script**
 
 Start both servers, add the sample data, and open http://localhost:5173. Every step passed using scripted clicks on the real pages, on a fresh clone for `demo-and-docs` and on a scratch copy for `connected-workflow`.
@@ -431,6 +445,8 @@ Claude suggested six additions and offered a duplicate check as a seventh. The o
 
 **After the plan, `summary-and-readme`.** The owner asked to cut the README's challenges to the three that best show decision making and problem solving, to drop the limitation about frontend tests, and for the assessment's other deliverable, a summary of at most 200 words in a separate PDF. Claude chose the three and sharpened their wording, wrote the summary in the owner's voice, and built the PDF. Two reviewers then checked the facts and the clarity (section 8).
 
+**After the plan, `ai-development-docs`.** The owner asked for a README section on AI-assisted development, covering how the work went step by step, example prompts, the practices used, how a new developer continues with Claude, and who does what. They also asked for a short note at the start of this file, and a line for stakeholders if it fit naturally. Claude wrote these and put the stakeholder line under the README's opening description. Its prompts are reworded examples. A brand-new session then tested the docs, and what it found led to `CLAUDE.md` and the fixes in section 8.
+
 ## 10. How to continue
 
 1. Read section 1, then section 3.
@@ -461,5 +477,6 @@ Claude suggested six additions and offered a duplicate check as a seventh. The o
 - In a browser script, the URL changes a moment before React redraws, and the customer and job pages share a status dropdown and badge. Wait for the next page's heading before reading anything.
 - The repo has no automated checks on GitHub, so a PR shows no CI results. Tests run locally.
 - Known limitations are in the README. In testing, simultaneous requests double-booked 4 of 10 slots in one run and 8 of 10 in another.
-- The README is written in the owner's voice and leaves out AI by the owner's choice, while this file records how the work was done.
-- `Smarti_CRM_Summary.pdf` was built from a throwaway HTML page with headless Chrome, using the Poppins files in `frontend/node_modules`. To change it, rebuild it the same way and keep it to 200 words. `pdftoppm` isn't installed here, so `pypdfium2` in a scratch folder can render a page to check how it looks.
+- The README is written in the owner's voice.
+- To make a scratch copy, copy `backend` and `frontend` to a temporary folder, leaving out `node_modules`, `.venv` and `crm.db`, and run `npm ci` in the copy's frontend. `database.py` builds its path from its own location, so the copy gets its own `crm.db`. Run the copy's backend on another port and change the port in the copy's `vite.config.js`. Without that change, the copied frontend talks to the real backend and writes to the real `crm.db`.
+- `Smarti_CRM_Summary.pdf` is a one-off hand-in, so later changes to the app don't need to update it. It was built from a throwaway HTML page with headless Chrome, using the Poppins files in `frontend/node_modules`. To change it, rebuild it the same way and keep it to 200 words. `pdftoppm` isn't installed here, so `pypdfium2` in a scratch folder can render a page to check how it looks.
