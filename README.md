@@ -362,7 +362,7 @@ I built this app with [Claude Code](https://claude.com/claude-code), Anthropic's
 2. Say what you want, such as "Tell me where the project stands, then help me add a Cancelled job status."
 3. Answer its questions, try the result, and merge its pull request.
 
-This works because `CLAUDE.md` sends a new session straight to `HANDOFF.md`, which gives it the brief, the rules, each decision with its reason, a code guide and past problems, so you don't re-explain anything. Claude updates the file on each branch, so the next session picks up where this one stopped. You take my place as the owner in that file.
+This works because `CLAUDE.md` sends a new session straight to `HANDOFF.md`, which gives it the brief, the rules, each decision with its reason, a code guide and past problems, so you don't re-explain anything. Claude updates the file on each branch, so the next session picks up where this one stopped. You take my place as the owner in that file's working rules.
 
 You don't need to read that file to stay in the loop. This README covers what was built, why and how, each pull request says what changed and how it was tested, and Claude can explain any decision or piece of code when you ask.
 

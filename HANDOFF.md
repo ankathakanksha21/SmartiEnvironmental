@@ -6,7 +6,7 @@ It holds the current status and plan, the brief, the working rules, each decisio
 
 Developers don't need to read it unless they want every detail. [README.md](README.md) explains what was built, why and how, and holds the setup steps, the code layout and the database diagram.
 
-"The owner" below means the repo owner, ankathakanksha21. A developer who continues this work takes the owner's place in sections 1 and 3, and commits under their own git identity.
+"The owner" below means the repo owner, ankathakanksha21. After hand-in, a developer who continues this work takes the owner's place. They decide what new work starts, merge its PRs and commit under their own git identity. The repo is private, so they need access from the owner.
 
 ## 1. Current status
 
@@ -71,7 +71,7 @@ The code must be understandable, and the owner must be able to explain it. Anoth
 These come from the owner and apply to every session.
 
 **Git**
-- Author everything as `ankathakanksha21 <ankathakanksha@gmail.com>`.
+- Author everything as `ankathakanksha21 <ankathakanksha@gmail.com>`, or as the developer who has taken over (see the note at the top). Check the identity before the first commit.
 - Only the first commit went straight to main.
 - Each feature or step gets one branch from main, and all work on it stays on that branch.
 - Claude raises the PR and says when it's ready. The owner merges it.
@@ -90,7 +90,7 @@ These come from the owner and apply to every session.
 
 **Writing**
 - Keep documents short, clear and step by step.
-- Follow the `no-ai-slop` skill for documents, code comments, commit messages and PR text.
+- Follow the `no-ai-slop` skill, if it's installed, for documents, code comments, commit messages and PR text.
 - The README mentions Claude only in its section on AI-assisted development.
 - This file holds summaries, never the owner's prompts word for word.
 - Use they/them for people.
@@ -234,7 +234,7 @@ Pages: `StaffList`, `StaffDetail`, `StaffNew`, `StaffEdit`. The last two share `
 - `Job.is_overdue` in `models.py` is true when the time has passed and the status is still Pending.
 - `Job.customer` and `Job.staff` are SQLAlchemy relationships, and `JobOut` includes both records. `joinedload` in `list_jobs` fetches them in one query.
 - `JobsTable` loads its own data from a `path` prop, so the Overview, the jobs page, customer pages and staff pages all reuse it. A `limit` prop shows only the first few, and customer and staff names link to their pages.
-- An open job is any job that isn't Completed. A new job status needs a decision on whether it counts as open, and then changes in `has_clash`, the upcoming filter and `reopening` in `routes/jobs.py`, `openJob` in `CustomerNextStep.jsx`, `openJobsFor` in `Overview.jsx` and the Completed check in `JobDetail.jsx`. `test_update_job_status_rejects_an_unknown_status` uses "Cancelled" as its unknown status, so it needs another word if that status is added.
+- An open job is any job that isn't Completed. A new job status needs a decision on whether it counts as open. If it doesn't, change `has_clash`, the upcoming filter and `reopening` in `routes/jobs.py`, `openJob` and the `jobs.length` check after it in `CustomerNextStep.jsx`, `openJobsFor` in `Overview.jsx` and the Completed check in `JobDetail.jsx`. `test_update_job_status_rejects_an_unknown_status` uses "Cancelled" as its unknown status, so it needs another word if that status is added. `JobOut` uses the same status list, so a saved status that the running code doesn't know makes job responses fail, which is one more reason to try a new status on a scratch copy first.
 - `JobForm` loads the customer and staff lists for its dropdowns. It keeps an inactive staff member as an option only if the job already has them.
 - A customer's **Book a job** button opens `/jobs/new?customer_id=1`, and `JobNew` starts with that customer selected. It also reads `description` from the URL, for follow-up visits.
 
@@ -351,7 +351,7 @@ The first commit message on `staff` says unticking Active takes someone off the 
 
 **Results on `summary-and-readme`:** This branch changes only the docs and adds the PDF, so the code results above still stand. `Smarti_CRM_Summary.pdf` is one A4 page of 193 words, counting its title and headings. A fact-checker found three claims in the first drafts that overstated the evidence or were wrong, and a cold reader found unclear wording. Claude fixed these. They were that "chose the stack from evidence" implied React and SQLite were compared, that the PostgreSQL move was stated as fact, and that "only a booking or a move" ignored completing a job.
 
-**Results on `ai-development-docs`:** This branch changes only the docs and adds `CLAUDE.md`, so the code results above still stand. A brand-new session with no other context was given the README's example prompt. It reported the project's status and rules correctly, planned a Cancelled status file by file, and came back with questions for the developer. Its gaps led to `CLAUDE.md`, the note on who takes the owner's place, the definition of an open job and the steps for a scratch copy. A fact-checker also corrected lines that overstated the record.
+**Results on `ai-development-docs`:** This branch changes only the docs and adds `CLAUDE.md`, so the code results above still stand. A brand-new session with no other context was given the README's example prompt. It reported the project's status and rules correctly, planned a Cancelled status file by file, and came back with questions for the developer. Its gaps led to `CLAUDE.md`, the note on who takes the owner's place, the definition of an open job and the steps for a scratch copy. A fact-checker also corrected lines that overstated the record. A second new session, given only the repo and the same request, found `CLAUDE.md` by itself, read this file, took the owner's place correctly and planned the work. Its smaller findings are fixed too.
 
 **Demo script**
 
@@ -445,7 +445,7 @@ Claude suggested six additions and offered a duplicate check as a seventh. The o
 
 **After the plan, `summary-and-readme`.** The owner asked to cut the README's challenges to the three that best show decision making and problem solving, to drop the limitation about frontend tests, and for the assessment's other deliverable, a summary of at most 200 words in a separate PDF. Claude chose the three and sharpened their wording, wrote the summary in the owner's voice, and built the PDF. Two reviewers then checked the facts and the clarity (section 8).
 
-**After the plan, `ai-development-docs`.** The owner asked for a README section on AI-assisted development, covering how the work went step by step, example prompts, the practices used, how a new developer continues with Claude, and who does what. They also asked for a short note at the start of this file, and a line for stakeholders if it fit naturally. Claude wrote these and put the stakeholder line under the README's opening description. Its prompts are reworded examples. A brand-new session then tested the docs, and what it found led to `CLAUDE.md` and the fixes in section 8.
+**After the plan, `ai-development-docs`.** The owner asked for a README section on AI-assisted development, covering how the work went step by step, example prompts, the practices used, how a new developer continues with Claude, and who does what. They also asked for a short note at the start of this file, and a line for stakeholders if it fit naturally. Claude wrote these and put the stakeholder line under the README's opening description. The README's prompts are reworded examples. A brand-new session then tested the docs, and what it found led to `CLAUDE.md` and the fixes in section 8.
 
 ## 10. How to continue
 
@@ -478,5 +478,5 @@ Claude suggested six additions and offered a duplicate check as a seventh. The o
 - The repo has no automated checks on GitHub, so a PR shows no CI results. Tests run locally.
 - Known limitations are in the README. In testing, simultaneous requests double-booked 4 of 10 slots in one run and 8 of 10 in another.
 - The README is written in the owner's voice.
-- To make a scratch copy, copy `backend` and `frontend` to a temporary folder, leaving out `node_modules`, `.venv` and `crm.db`, and run `npm ci` in the copy's frontend. `database.py` builds its path from its own location, so the copy gets its own `crm.db`. Run the copy's backend on another port and change the port in the copy's `vite.config.js`. Without that change, the copied frontend talks to the real backend and writes to the real `crm.db`.
+- To make a scratch copy, copy `backend` and `frontend` to a temporary folder, leaving out `node_modules`, `.venv` and `crm.db`. In the copy's backend, create a virtual environment and install the packages as in the README's step 1, and run `npm ci` in the copy's frontend. `database.py` builds its path from its own location, so the copy gets its own `crm.db`. Run the copy's backend on another port and change the port in the copy's `vite.config.js`. Without that change, the copied frontend talks to the real backend and writes to the real `crm.db`.
 - `Smarti_CRM_Summary.pdf` is a one-off hand-in, so later changes to the app don't need to update it. It was built from a throwaway HTML page with headless Chrome, using the Poppins files in `frontend/node_modules`. To change it, rebuild it the same way and keep it to 200 words. `pdftoppm` isn't installed here, so `pypdfium2` in a scratch folder can render a page to check how it looks.
